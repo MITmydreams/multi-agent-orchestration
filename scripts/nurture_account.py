@@ -104,8 +104,8 @@ async def get_account_from_db(phone: str) -> dict | None:
 
 async def connect_account(phone: str, session_file: str, proxy_config: dict | None) -> TelegramClient | None:
     """Connect to Telegram using existing session."""
-    api_id = int(os.getenv("TG_API_ID", "2040"))
-    api_hash = os.getenv("TG_API_HASH", "b18441a1ff607e10a989891a5462e627")
+    api_id = int(os.environ["TG_API_ID"])
+    api_hash = os.environ["TG_API_HASH"]
 
     # Load session from file
     session_path = Path(session_file)

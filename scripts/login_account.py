@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 
-API_ID = 2040
-API_HASH = "b18441a1ff607e10a989891a5462e627"
+API_ID = int(os.environ["TG_API_ID"])
+API_HASH = os.environ["TG_API_HASH"]
 SESSIONS_DIR = "tdlib_sessions"
 
 async def login():

@@ -30,8 +30,8 @@ async def check_account() -> None:
 
     # --- Configuration ---
     session_file = "tdlib_sessions/account_1/10000000001"  # Telethon adds .session
-    api_id = int(os.getenv("TG_API_ID", "2040"))
-    api_hash = os.getenv("TG_API_HASH", "b18441a1ff607e10a989891a5462e627")
+    api_id = int(os.environ["TG_API_ID"])
+    api_hash = os.environ["TG_API_HASH"]
 
     # Proxy config (from config/proxies.json, proxy_id=1)
     proxy_config = {

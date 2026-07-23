@@ -131,8 +131,8 @@ async def import_one(phone, proxy, role, api_id, api_hash):
 
 
 async def main():
-    api_id = int(os.getenv("TG_API_ID", "2040"))
-    api_hash = os.getenv("TG_API_HASH", "b18441a1ff607e10a989891a5462e627")
+    api_id = int(os.environ["TG_API_ID"])
+    api_hash = os.environ["TG_API_HASH"]
 
     engine = create_async_engine(DB_URL, echo=False)
 
