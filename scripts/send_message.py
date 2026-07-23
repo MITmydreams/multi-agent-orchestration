@@ -3,6 +3,7 @@
 Usage:
     .venv/bin/python scripts/send_message.py --account 1 --group thebuttongroup --message "Hey!"
 """
+import os
 import argparse
 import asyncio
 import json
@@ -64,7 +65,7 @@ async def main():
     proxy = proxies.get(proxy_id)
     proxy_tuple = make_proxy(proxy) if proxy else None
 
-    client = TelegramClient(session_file, api_id=2040, api_hash="b18441a1ff607e10a989891a5462e627")
+    client = TelegramClient(session_file, api_id=int(os.environ["TG_API_ID"]), api_hash=os.environ["TG_API_HASH"])
     if proxy_tuple:
         client.set_proxy(proxy_tuple)
 
