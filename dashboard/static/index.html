@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TG 小队作战中心</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 背景网格 -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- 错误提示条 -->
+  <div id="errorBanner" class="error-banner hidden">
+    <span class="err-icon">⚠</span>
+    <span id="errorText">无法连接到后台服务 (localhost:8765)，请确认服务是否启动</span>
+    <button id="errorDismiss">×</button>
+  </div>
+
+  <!-- 顶部栏 -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">🤖</div>
+      <div class="brand-text">
+        <h1>TG <span class="accent">小队作战中心</span></h1>
+        <div class="brand-sub">Telegram 推广系统 · 实时监控面板</div>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      <div class="meta-pill" title="AI 大脑当前使用的模型">
+        <span class="meta-label">AI 大脑</span>
+        <span id="aiMode" class="meta-val">--</span>
+      </div>
+      <div class="meta-pill" title="系统调度循环次数，每60秒+1">
+        <span class="meta-label">心跳次数</span>
+        <span id="cycleNum" class="meta-val mono">0</span>
+      </div>
+      <div class="meta-pill" title="系统已运行时间">
+        <span class="meta-label">运行时长</span>
+        <span id="uptime" class="meta-val mono">--</span>
+      </div>
+      <div class="meta-pill live-pill" id="livePill">
+        <span class="live-dot"></span>
+        <span id="liveStatus">连接中</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 指标卡片 -->
+  <section class="stat-row">
+    <div class="stat-card" title="系统中总共管理的 TG 账号数量">
+      <div class="stat-icon">👥</div>
+      <div class="stat-body">
+        <div class="stat-num mono" id="statAgents">0</div>
+        <div class="stat-label">队员总数</div>
+      </div>
+      <div class="stat-spark"></div>
+    </div>
+    <div class="stat-card" title="当前正在执行任务的账号数">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-body">
+        <div class="stat-num mono accent-green" id="statActive">0</div>
+        <div class="stat-label">正在上班</div>
+      </div>
+    </div>
+    <div class="stat-card" title="已经渗透进入的 Telegram 群组数量">
+      <div class="stat-icon">🏠</div>
+      <div class="stat-body">
+        <div class="stat-num mono" id="statGroups">0</div>
+        <div class="stat-label">已进驻群组</div>
+      </div>
+    </div>
+    <div class="stat-card" title="AI 累计生成的内容总数（表情包、战报、故事、评测等）">
+      <div class="stat-icon">📝</div>
+      <div class="stat-body">
+        <div class="stat-num mono accent-cyan" id="statContent">0</div>
+        <div class="stat-label">AI 产出内容</div>
+      </div>
+    </div>
+    <div class="stat-card" title="0-1 之间，越低越安全，超过 0.5 会触发限速">
+      <div class="stat-icon">🛡</div>
+      <div class="stat-body">
+        <div class="stat-num mono" id="statRisk">0.00</div>
+        <div class="stat-label">平均风险度</div>
+        <div class="risk-bar"><div id="riskBarFill" class="risk-bar-fill"></div></div>
+      </div>
+    </div>
+    <div class="stat-card" title="绿色=正常 / 黄色=谨慎 / 红色=全体暂停">
+      <div class="stat-icon">💚</div>
+      <div class="stat-body">
+        <div class="stat-num"><span id="healthBadge" class="health-badge health-green">正常</span></div>
+        <div class="stat-label">系统状态</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主网格 -->
+  <main class="main-grid">
+    <!-- 左侧：队员列表 -->
+    <section class="panel panel-fleet">
+      <div class="panel-head">
+        <div class="panel-title">📱 我的队员</div>
+        <div class="panel-tools">
+          <div class="filter-group" id="roleFilter">
+            <button class="filter-btn active" data-role="all" title="显示全部">全部</button>
+            <button class="filter-btn" data-role="infiltrator" title="潜伏队员 - 进群混圈子做推广">🕵️ 潜伏员</button>
+            <button class="filter-btn" data-role="scout" title="侦察兵 - 只找群不发言">🔍 侦察兵</button>
+            <button class="filter-btn" data-role="content" title="内容生产 - AI写段子和战报">📝 写手</button>
+            <button class="filter-btn" data-role="backup" title="替补队员 - 待命中">💤 替补</button>
+          </div>
+          <select id="sortSelect" class="sort-select">
+            <option value="activity">按活跃度排序</option>
+            <option value="risk">按风险度排序</option>
+            <option value="role">按角色分组</option>
+          </select>
+        </div>
+      </div>
+      <div id="agentGrid" class="agent-grid">
+        <div class="empty-state">加载队员中...</div>
+      </div>
+    </section>
+
+    <!-- 右侧：实时动态 + 内容 -->
+    <div class="right-col">
+      <section class="panel panel-activity">
+        <div class="panel-head">
+          <div class="panel-title">📡 实时动态</div>
+          <div class="panel-sub" id="activityCount">0 条事件</div>
+        </div>
+        <div id="activityFeed" class="activity-feed">
+          <div class="empty-state">等待事件中...</div>
+        </div>
+      </section>
+
+      <section class="panel panel-content">
+        <div class="panel-head">
+          <div class="panel-title">📝 AI 产出内容</div>
+          <div class="panel-sub" id="contentCount">0 条</div>
+        </div>
+        <div id="contentStream" class="content-stream">
+          <div class="empty-state">暂无内容...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- 目标群组列表 -->
+  <section class="panel panel-groups">
+    <div class="panel-head">
+      <div class="panel-title">🏠 目标群组</div>
+      <div class="panel-sub" id="groupCount">0 个群</div>
+    </div>
+    <div class="table-wrap">
+      <table class="groups-table">
+        <thead>
+          <tr>
+            <th>群名称</th>
+            <th>群链接</th>
+            <th>群质量</th>
+            <th>成员数</th>
+            <th>语言</th>
+            <th>已派驻队员</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody id="groupsTbody">
+          <tr><td colspan="7" class="empty-state">加载群组中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 操作说明 -->
+  <section class="panel help-panel">
+    <div class="panel-head">
+      <div class="panel-title">❓ 新手说明</div>
+    </div>
+    <div class="help-grid">
+      <div class="help-item">
+        <div class="help-icon">🕵️</div>
+        <div class="help-text">
+          <b>潜伏员</b>：核心战力。进群先潜水5天→建立信任14天→开始软推广。每人每天最多发40条消息，其中推广不超过8条。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">🔍</div>
+        <div class="help-text">
+          <b>侦察兵</b>：专门找目标群。只看不发言，0风险。发现优质群后交给潜伏员进驻。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">📝</div>
+        <div class="help-text">
+          <b>写手</b>：AI 大脑生产内容（表情包、大奖战报、中奖故事、项目评测），投放到各群提升热度。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">💤</div>
+        <div class="help-text">
+          <b>替补</b>：待命中的账号。主力被封或冬眠时顶上。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">🛡</div>
+        <div class="help-text">
+          <b>风险度</b>：0-1 之间。0.4 开始降速，0.5 严格限制，0.65 强制冬眠 72 小时，0.8 直接弃号。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">💚</div>
+        <div class="help-text">
+          <b>系统状态</b>：正常=全速运行 / 谨慎=降速50% / 暂停=被封号率超10%，全员停工等人工介入。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">🏠</div>
+        <div class="help-text">
+          <b>群质量等级</b>：S=顶级优质(大群+活跃) / A=优质 / B=一般 / C=低质。只重点运营 S/A 级群。
+        </div>
+      </div>
+      <div class="help-item">
+        <div class="help-icon">⚙️</div>
+        <div class="help-text">
+          <b>心跳次数</b>：系统每 60 秒自动执行一轮任务调度（风险评估 → 分配任务 → 生产内容 → 收集数据）。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>最后更新: <span id="lastUpdate" class="mono">--</span></span>
+    <span class="dot-sep">·</span>
+    <span>后台服务: <span class="mono">localhost:8765</span></span>
+    <span class="dot-sep">·</span>
+    <span>TG 小队作战中心 v1.0</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

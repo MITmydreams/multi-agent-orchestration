@@ -1,0 +1,2 @@
+# One public invite link or @username per line (examples only)
+# https://t.me/example_group

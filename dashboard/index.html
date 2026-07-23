@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE BUTTON — 推广作战中心</title>
+<style>
+/* ══════════════════════════════════════════
+   SIDEBAR DASHBOARD — Pure CSS + JS
+   ══════════════════════════════════════════ */
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0e1a;
+  --sidebar-bg: #0d1117;
+  --accent: #ff0040;
+  --success: #00ff88;
+  --warn: #ffaa00;
+  --card-bg: rgba(255,255,255,0.03);
+  --card-border: rgba(255,255,255,0.06);
+  --text: #e0e0e0;
+  --text-dim: #8892a4;
+  --num: #ffffff;
+  --font-mono: 'Courier New', 'Consolas', monospace;
+  --sidebar-w: 200px;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+/* ══════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════ */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex; flex-direction: column;
+  z-index: 200;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-logo-dot {
+  width: 12px; height: 12px; border-radius: 50%; background: var(--accent);
+  animation: pulse-dot 1.5s infinite; flex-shrink: 0;
+}
+.sidebar-logo-text {
+  font-size: 16px; font-weight: 800; letter-spacing: 2px; color: #fff;
+  text-transform: uppercase;
+}
+
+.sidebar-nav {
+  flex: 1; padding: 12px 0; overflow-y: auto;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; cursor: pointer; position: relative;
+  color: var(--text-dim); font-size: 14px; font-weight: 500;
+  transition: all 0.2s; border-left: 3px solid transparent;
+  user-select: none;
+}
+.nav-item:hover {
+  background: rgba(255,255,255,0.04); color: var(--text);
+}
+.nav-item.active {
+  background: rgba(255,0,64,0.08); color: #fff;
+  border-left-color: var(--accent);
+}
+.nav-item-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-item-label { white-space: nowrap; }
+
+.sidebar-bottom {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+
+/* Sidebar mini score ring */
+.sidebar-ring-wrap { position: relative; width: 60px; height: 60px; }
+.sidebar-ring {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,0.05) 0deg);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.8s ease;
+}
+.sidebar-ring-inner {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--sidebar-bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.sidebar-score-num {
+  font-size: 20px; font-weight: 900; line-height: 1;
+  font-family: var(--font-mono);
+  transition: color 0.5s;
+}
+.sidebar-score-label {
+  font-size: 9px; font-weight: 700; margin-top: 1px;
+  color: var(--accent);
+}
+
+.sidebar-pulse {
+  font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.4;
+}
+.sidebar-pulse-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle;
+}
+.sidebar-pulse-dot.green { background: var(--success); animation: pulse-dot 1.5s infinite; }
+.sidebar-pulse-dot.yellow { background: var(--warn); }
+.sidebar-pulse-dot.red { background: var(--accent); }
+
+/* ── Hamburger (mobile) ── */
+.hamburger {
+  display: none; position: fixed; top: 12px; left: 12px; z-index: 300;
+  width: 40px; height: 40px; border-radius: 8px;
+  background: var(--sidebar-bg); border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer; align-items: center; justify-content: center;
+  font-size: 20px; color: #fff;
+}
+.sidebar-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 150;
+}
+
+/* ══════════════════════════════════════════
+   CONTENT AREA
+   ══════════════════════════════════════════ */
+.content {
+  margin-left: var(--sidebar-w);
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+.page-title {
+  font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.page-title-icon { font-size: 24px; }
+
+/* ══════════════════════════════════════════
+   OVERVIEW PAGE
+   ══════════════════════════════════════════ */
+.kpi-cards {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px;
+  padding: 18px; text-align: center;
+  transition: border-color 0.3s;
+}
+.kpi-card:hover { border-color: rgba(255,255,255,0.12); }
+.kpi-card-num {
+  font-size: 36px; font-weight: 900; color: var(--num); font-family: var(--font-mono);
+  line-height: 1.1; transition: transform 0.3s;
+}
+.kpi-card-label { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+
+/* Funnel */
+.section-title {
+  font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--card-border);
+}
+.funnel-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px; padding: 6px 0;
+}
+.funnel-label { width: 100px; font-size: 13px; color: var(--text-dim); text-align: right; flex-shrink: 0; }
+.funnel-num { width: 60px; font-size: 20px; font-weight: 800; color: var(--num); font-family: var(--font-mono); text-align: right; flex-shrink: 0; }
+.funnel-bar-wrap { flex: 1; height: 28px; background: rgba(255,255,255,0.03); border-radius: 4px; overflow: hidden; }
+.funnel-bar {
+  height: 100%; border-radius: 4px;
+  transition: width 0.8s ease;
+  min-width: 2px;
+}
+.funnel-pct { width: 55px; font-size: 13px; color: var(--text-dim); font-family: var(--font-mono); flex-shrink: 0; }
+.funnel-bar.fb-0 { background: linear-gradient(90deg, #4488ff, #66aaff); }
+.funnel-bar.fb-1 { background: linear-gradient(90deg, #3399ff, #55bbff); }
+.funnel-bar.fb-2 { background: linear-gradient(90deg, #22aa66, #44cc88); }
+.funnel-bar.fb-3 { background: linear-gradient(90deg, #44bb55, #66dd77); }
+.funnel-bar.fb-4 { background: linear-gradient(90deg, #aaaa22, #cccc44); }
+.funnel-bar.fb-5 { background: linear-gradient(90deg, #dd8822, #ffaa44); }
+.funnel-bar.fb-6 { background: linear-gradient(90deg, #dd4422, #ff6644); }
+.funnel-bar.fb-7 { background: linear-gradient(90deg, #cc2244, #ee4466); }
+
+/* Bottleneck */
+.alert-box {
+  border-radius: 8px; padding: 16px 20px; position: relative;
+  border-left: 5px solid var(--accent);
+  background: rgba(255,0,64,0.06);
+  animation: alert-shake 4s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+.alert-box.alert-green {
+  border-left-color: var(--success);
+  background: rgba(0,255,136,0.06);
+  animation: none;
+}
+.alert-box.alert-orange {
+  border-left-color: var(--warn);
+  background: rgba(255,170,0,0.06);
+}
+.alert-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.alert-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+.alert-tip { font-size: 13px; color: var(--warn); margin-top: 8px; }
+
+@keyframes alert-shake {
+  0%, 90%, 100% { transform: translateX(0); }
+  92% { transform: translateX(-2px); }
+  94% { transform: translateX(2px); }
+  96% { transform: translateX(-1px); }
+  98% { transform: translateX(1px); }
+}
+
+/* Trends */
+.trends-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.trend-col {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 10px; padding: 20px; text-align: center;
+}
+.trend-period { font-size: 14px; font-weight: 700; color: var(--text-dim); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+.trend-item { margin-bottom: 12px; }
+.trend-num { font-size: 28px; font-weight: 800; color: var(--num); font-family: var(--font-mono); }
+.trend-label { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+/* ══════════════════════════════════════════
+   ACCOUNTS PAGE
+   ══════════════════════════════════════════ */
+.accounts-grid {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.account-card {
+  background: var(--card-bg); border-radius: 8px; padding: 0;
+  border: 1px solid var(--card-border);
+  transition: border-color 0.3s;
+  overflow: hidden;
+}
+.account-card:hover { border-color: rgba(255,255,255,0.12); }
+.account-card.expanded { border-color: rgba(255,0,64,0.3); }
+.account-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer;
+}
+.account-row:hover { background: rgba(255,255,255,0.02); }
+.account-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.account-id { font-weight: 700; font-size: 13px; color: #fff; width: 32px; flex-shrink: 0; }
+.account-phone { font-size: 13px; color: var(--text-dim); width: 110px; flex-shrink: 0; font-family: var(--font-mono); }
+.account-stat { font-size: 12px; color: var(--text-dim); text-align: center; min-width: 55px; }
+.account-stat-val { font-size: 16px; font-weight: 700; color: #fff; }
+.account-stat-label { font-size: 10px; margin-top: 1px; }
+.account-idle-tag { font-size: 11px; color: var(--accent); font-weight: 700; }
+.account-expand-btn {
+  margin-left: auto; font-size: 18px; color: var(--text-dim); flex-shrink: 0;
+  width: 32px; text-align: center; transition: transform 0.3s;
+}
+.account-card.expanded .account-expand-btn { transform: rotate(180deg); }
+.account-groups-inner {
+  display: none; padding: 8px 14px 12px; border-top: 1px solid rgba(255,255,255,0.05);
+  overflow-x: auto;
+}
+.account-card.expanded .account-groups-inner { display: block; }
+.account-groups-inner table { width: 100%; min-width: 400px; }
+.account-name { display: none; } /* legacy, unused in new layout */
+.account-meta { display: none; } /* legacy, unused in new layout */
+
+/* ══════════════════════════════════════════
+   GROUPS PAGE
+   ══════════════════════════════════════════ */
+.group-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.grade-btn {
+  padding: 5px 16px; border-radius: 16px; border: 1px solid var(--card-border);
+  background: transparent; color: var(--text-dim); font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+}
+.grade-btn:hover, .grade-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.status-filter { display: flex; gap: 8px; margin-bottom: 14px; }
+.status-btn {
+  padding: 5px 16px; border-radius: 16px; border: 1px solid var(--card-border);
+  background: transparent; color: var(--text-dim); font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+}
+.status-btn:hover, .status-btn.active { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left; padding: 10px 12px; color: var(--text-dim); font-weight: 600;
+  border-bottom: 1px solid var(--card-border); font-size: 12px; white-space: nowrap;
+}
+.data-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px;
+  font-size: 11px; font-weight: 700;
+}
+.badge-S { background: rgba(255,0,128,0.15); color: #ff0080; }
+.badge-A { background: rgba(0,255,136,0.15); color: var(--success); }
+.badge-B { background: rgba(68,170,255,0.15); color: #44aaff; }
+.badge-C { background: rgba(255,170,0,0.15); color: var(--warn); }
+.badge-D { background: rgba(255,0,64,0.15); color: var(--accent); }
+.badge-F { background: rgba(255,255,255,0.05); color: var(--text-dim); }
+
+.pagination {
+  display: flex; align-items: center; gap: 12px; margin-top: 16px; justify-content: center;
+}
+.page-btn {
+  padding: 6px 14px; border-radius: 6px; border: 1px solid var(--card-border);
+  background: transparent; color: var(--text); font-size: 13px; cursor: pointer;
+  transition: all 0.2s;
+}
+.page-btn:hover { background: rgba(255,255,255,0.06); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-info { font-size: 13px; color: var(--text-dim); }
+
+/* ══════════════════════════════════════════
+   PROMO PAGE
+   ══════════════════════════════════════════ */
+.promo-section { margin-bottom: 28px; }
+.progress-wrap {
+  background: rgba(255,255,255,0.05); border-radius: 8px; height: 24px;
+  overflow: hidden; position: relative; margin-top: 8px;
+}
+.progress-bar {
+  height: 100%; border-radius: 8px;
+  background: linear-gradient(90deg, var(--accent), #ff4466);
+  transition: width 0.8s ease;
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+  font-size: 11px; font-weight: 700; color: #fff; min-width: 30px;
+}
+.promo-stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 13px;
+}
+.promo-stat-label { color: var(--text-dim); }
+.promo-stat-val { color: var(--num); font-weight: 700; font-family: var(--font-mono); }
+
+.top-list { margin-top: 8px; }
+.top-item {
+  display: flex; align-items: center; gap: 10px; padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 13px;
+}
+.top-rank { width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-dim); flex-shrink: 0; }
+.top-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-val { font-family: var(--font-mono); font-weight: 700; color: var(--num); flex-shrink: 0; }
+
+.phase-bars { margin-top: 8px; }
+.phase-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.phase-bar-label { width: 100px; font-size: 12px; color: var(--text-dim); text-align: right; flex-shrink: 0; }
+.phase-bar-track { flex: 1; height: 20px; background: rgba(255,255,255,0.03); border-radius: 4px; overflow: hidden; }
+.phase-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; background: linear-gradient(90deg, #4488ff, #66aaff); }
+.phase-bar-val { width: 40px; font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); flex-shrink: 0; }
+
+/* ══════════════════════════════════════════
+   ACTIVITY PAGE
+   ══════════════════════════════════════════ */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+  width: 2px; background: rgba(255,255,255,0.06);
+}
+.timeline-item {
+  position: relative; padding: 10px 0 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+.timeline-item::before {
+  content: ''; position: absolute; left: -22px; top: 14px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--card-border);
+}
+.timeline-item.type-link::before { background: #4488ff; }
+.timeline-item.type-message::before { background: var(--success); }
+.timeline-item.type-join::before { background: #ff6b00; }
+.timeline-item.type-discover::before { background: #ff0080; }
+.timeline-time { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+.timeline-icon { margin-right: 6px; }
+.timeline-text { font-size: 13px; color: var(--text); margin-top: 2px; }
+
+/* ══════════════════════════════════════════
+   LOGS PAGE
+   ══════════════════════════════════════════ */
+.log-container {
+  background: #050810; border-radius: 8px; padding: 16px;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.8;
+  height: calc(100vh - 120px); overflow-y: auto; color: #88cc88;
+}
+.log-line { white-space: pre-wrap; word-break: break-all; }
+.log-line .log-ts { color: #555; }
+.log-line .log-warn { color: var(--warn); font-weight: 600; }
+.log-line .log-err { color: var(--accent); font-weight: 600; }
+.log-line .log-info { color: #66aaff; }
+.log-line .log-success { color: var(--success); }
+
+/* ══════════════════════════════════════════
+   ANIMATIONS
+   ══════════════════════════════════════════ */
+.num-flash { animation: num-pop 0.4s ease; }
+@keyframes num-pop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.12); filter: brightness(1.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* Score tiers */
+.score-tier-red { color: var(--accent); }
+.score-tier-orange { color: #ff6b00; }
+.score-tier-yellow { color: var(--warn); }
+.score-tier-green { color: #44cc77; }
+.score-tier-neon { color: var(--success); animation: neon-pulse 1.5s infinite; }
+
+@keyframes neon-pulse {
+  0%, 100% { text-shadow: 0 0 10px var(--success), 0 0 30px var(--success), 0 0 60px rgba(0,255,136,0.3); }
+  50% { text-shadow: 0 0 20px var(--success), 0 0 50px var(--success), 0 0 100px rgba(0,255,136,0.5); }
+}
+
+/* ── Loading placeholder ── */
+.loading-msg {
+  padding: 40px; text-align: center; color: var(--text-dim); font-size: 14px;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — Mobile (<768px)
+   ══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .hamburger { display: flex; }
+  .content { margin-left: 0; padding: 16px; padding-top: 60px; }
+  .kpi-cards { grid-template-columns: repeat(2, 1fr); }
+  .trends-grid { grid-template-columns: 1fr; }
+  .accounts-grid { grid-template-columns: 1fr; }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 6px 8px; }
+  .page-title { font-size: 18px; }
+}
+
+@media (max-width: 480px) {
+  .kpi-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi-card { padding: 12px; }
+  .kpi-card-num { font-size: 28px; }
+  .funnel-row { flex-wrap: wrap; }
+  .funnel-label { width: 70px; font-size: 12px; }
+  .funnel-num { font-size: 16px; width: 45px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     HAMBURGER (mobile only)
+     ═══════════════════════════════════════ -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ═══════════════════════════════════════
+     SIDEBAR
+     ═══════════════════════════════════════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-dot"></div>
+    <span class="sidebar-logo-text">THE BUTTON</span>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-item active" id="nav-overview" onclick="switchPage('overview')">
+      <span class="nav-item-icon">📊</span><span class="nav-item-label">总览</span>
+    </div>
+    <div class="nav-item" id="nav-accounts" onclick="switchPage('accounts')">
+      <span class="nav-item-icon">👥</span><span class="nav-item-label">账号</span>
+    </div>
+    <div class="nav-item" id="nav-groups" onclick="switchPage('groups')">
+      <span class="nav-item-icon">💬</span><span class="nav-item-label">群组</span>
+    </div>
+    <div class="nav-item" id="nav-promo" onclick="switchPage('promo')">
+      <span class="nav-item-icon">📈</span><span class="nav-item-label">推广效果</span>
+    </div>
+    <div class="nav-item" id="nav-activity" onclick="switchPage('activity')">
+      <span class="nav-item-icon">📋</span><span class="nav-item-label">活动流</span>
+    </div>
+    <div class="nav-item" id="nav-logs" onclick="switchPage('logs')">
+      <span class="nav-item-icon">🔧</span><span class="nav-item-label">日志</span>
+    </div>
+    <div class="nav-item" id="nav-msgview" onclick="switchPage('msgview')">
+      <span class="nav-item-icon">💬</span><span class="nav-item-label">消息记录</span>
+    </div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-ring-wrap">
+      <div class="sidebar-ring" id="sidebar-ring">
+        <div class="sidebar-ring-inner">
+          <div class="sidebar-score-num score-tier-red" id="sidebar-score-num">--</div>
+          <div class="sidebar-score-label" id="sidebar-score-label">--</div>
+        </div>
+      </div>
+    </div>
+    <div id="sidebar-score-details"></div>
+    <div class="sidebar-pulse" id="sidebar-pulse">
+      <span class="sidebar-pulse-dot"></span> 加载中...
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     CONTENT AREA
+     ═══════════════════════════════════════ -->
+<div class="content">
+
+  <!-- ══ PAGE: OVERVIEW ══ -->
+  <div class="page active" id="page-overview">
+    <div class="page-title"><span class="page-title-icon">📊</span> 总览</div>
+
+    <div class="kpi-cards" id="kpi-cards">
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-discovered">--</div><div class="kpi-card-label">发现群</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-speakable">--</div><div class="kpi-card-label">可发言</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-joined">--</div><div class="kpi-card-label">已加入</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-phase">--</div><div class="kpi-card-label">推广阶段</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-today">--</div><div class="kpi-card-label">今日推广</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-msg6h" style="color:var(--success)">--</div><div class="kpi-card-label">6h 消息</div></div>
+    </div>
+
+    <section style="margin-bottom:28px">
+      <div class="section-title">📊 转化漏斗</div>
+      <div id="funnel-container"><div class="loading-msg">加载中...</div></div>
+    </section>
+
+    <section style="margin-bottom:28px">
+      <div class="section-title">📨 消息漏斗（24h）</div>
+      <div id="msg-funnel-container"><div class="loading-msg">加载中...</div></div>
+    </section>
+
+    <section style="margin-bottom:28px">
+      <div id="delivery-rate-card"></div>
+    </section>
+
+    <section style="margin-bottom:28px">
+      <div id="join-failures-card"></div>
+    </section>
+
+    <section style="margin-bottom:28px" id="bottleneck-section">
+      <div class="section-title">⚠️ 瓶颈警报</div>
+      <div id="bottleneck-container"><div class="alert-box alert-green"><div class="alert-title">加载中...</div></div></div>
+    </section>
+
+    <section>
+      <div class="section-title">📈 趋势面板</div>
+      <div class="trends-grid" id="trends-grid">
+        <div class="trend-col"><div class="trend-period">最近 1h</div><div id="trend-1h">--</div></div>
+        <div class="trend-col"><div class="trend-period">最近 6h</div><div id="trend-6h">--</div></div>
+        <div class="trend-col"><div class="trend-period">最近 24h</div><div id="trend-24h">--</div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ══ PAGE: ACCOUNTS ══ -->
+  <div class="page" id="page-accounts">
+    <div class="page-title"><span class="page-title-icon">👥</span> 账号状态 <span id="accounts-count" style="font-size:14px;color:var(--text-dim);font-weight:400"></span></div>
+    <div id="accounts-summary" style="margin-bottom:16px"></div>
+    <div class="accounts-grid" id="accounts-grid"><div class="loading-msg">加载中...</div></div>
+  </div>
+
+  <!-- ══ PAGE: GROUPS ══ -->
+  <div class="page" id="page-groups">
+    <div class="page-title"><span class="page-title-icon">💬</span> 群组 <span id="groups-count" style="font-size:14px;color:var(--text-dim);font-weight:400"></span></div>
+
+    <!-- Join trend chart -->
+    <div class="card" style="margin-bottom:16px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-weight:700;font-size:14px">📈 加群速率（48h）</div>
+        <div id="join-trend-summary" style="font-size:12px;color:var(--text-dim)"></div>
+      </div>
+      <div id="join-trend-chart" style="width:100%;overflow-x:auto"></div>
+    </div>
+
+    <div class="group-filters" id="group-filters">
+      <button class="grade-btn active" data-grade="" onclick="filterGroups('')">全部</button>
+      <button class="grade-btn" data-grade="S" onclick="filterGroups('S')">S</button>
+      <button class="grade-btn" data-grade="A" onclick="filterGroups('A')">A</button>
+      <button class="grade-btn" data-grade="B" onclick="filterGroups('B')">B</button>
+      <button class="grade-btn" data-grade="C" onclick="filterGroups('C')">C</button>
+    </div>
+    <div class="status-filter" id="status-filter">
+      <button class="status-btn active" data-status="" onclick="filterStatus('')">全部</button>
+      <button class="status-btn" data-status="speakable" onclick="filterStatus('speakable')">可发言</button>
+      <button class="status-btn" data-status="readonly" onclick="filterStatus('readonly')">只读</button>
+    </div>
+    <div id="groups-table-wrap" style="overflow-x:auto"><div class="loading-msg">加载中...</div></div>
+    <div class="pagination" id="groups-pagination"></div>
+  </div>
+
+  <!-- ══ PAGE: PROMO ══ -->
+  <div class="page" id="page-promo">
+    <div class="page-title"><span class="page-title-icon">📈</span> 推广效果</div>
+
+    <div class="promo-section">
+      <div class="section-title">消息成功率</div>
+      <div id="promo-success-rate"><div class="loading-msg">加载中...</div></div>
+    </div>
+
+    <div class="promo-section">
+      <div class="section-title">错误分类</div>
+      <div id="promo-errors"><div class="loading-msg">加载中...</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="promo-section">
+        <div class="section-title">按群分布 Top 10</div>
+        <div id="promo-by-group"><div class="loading-msg">加载中...</div></div>
+      </div>
+      <div class="promo-section">
+        <div class="section-title">按账号分布</div>
+        <div id="promo-by-account"><div class="loading-msg">加载中...</div></div>
+      </div>
+    </div>
+
+    <div class="promo-section">
+      <div class="section-title">Phase 分布</div>
+      <div id="promo-phases"><div class="loading-msg">加载中...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: ACTIVITY ══ -->
+  <div class="page" id="page-activity">
+    <div class="page-title"><span class="page-title-icon">📋</span> 活动流 <span id="activity-count" style="font-size:14px;color:var(--text-dim);font-weight:400"></span></div>
+    <div class="timeline" id="activity-timeline"><div class="loading-msg">加载中...</div></div>
+  </div>
+
+  <!-- ══ PAGE: LOGS ══ -->
+  <div class="page" id="page-logs">
+    <div class="page-title"><span class="page-title-icon">🔧</span> 实时日志 <span id="logs-count" style="font-size:14px;color:var(--text-dim);font-weight:400"></span></div>
+    <div class="log-container" id="log-container"><div style="color:var(--text-dim)">加载中...</div></div>
+  </div>
+
+  <!-- ══ PAGE: MESSAGE VIEW ══ -->
+  <div class="page" id="page-msgview">
+    <div class="page-title"><span class="page-title-icon">💬</span> 消息记录</div>
+
+    <!-- Account selector -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:13px;color:var(--text-dim)">选择账号：</span>
+      <button class="grade-btn active" data-acct="all" onclick="selectMsgAccount('all')">全部</button>
+      <div id="msg-account-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="msg-stats" style="font-size:12px;color:var(--text-dim);margin-bottom:12px"></div>
+
+    <!-- Message list -->
+    <div id="msg-list" style="display:flex;flex-direction:column;gap:10px">
+      <div class="loading-msg">加载中...</div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════ -->
+<script>
+/* ══════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════ */
+const pages = ['overview', 'accounts', 'groups', 'promo', 'activity', 'logs', 'msgview'];
+let currentPage = 'overview';
+
+// Persisted state across refreshes
+let expandedAccounts = {};  // { accountId: true/false }
+let showReadonlyAccounts = {};  // { accountId: true/false }
+let groupPage = 1;
+let currentGradeFilter = '';
+let currentStatusFilter = '';
+let prevScoreNum = null;
+let prevFunnelNums = {};
+let prevTrendNums = {};
+let prevKpiNums = {};
+
+/* ══════════════════════════════════════════
+   UTILS
+   ══════════════════════════════════════════ */
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+async function apiFetch(url) {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch (e) {
+    console.warn('API error:', url, e);
+    return null;
+  }
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function flashNum(el) {
+  el.classList.remove('num-flash');
+  void el.offsetWidth;
+  el.classList.add('num-flash');
+}
+
+function formatAgo(sec) {
+  if (sec === undefined || sec === null) return '--';
+  if (sec < 60) return sec + '秒前';
+  if (sec < 3600) return Math.floor(sec / 60) + '分钟前';
+  if (sec < 86400) return Math.floor(sec / 3600) + '小时前';
+  return Math.floor(sec / 86400) + '天前';
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR — Mobile Toggle
+   ══════════════════════════════════════════ */
+function toggleSidebar() {
+  const sb = $('#sidebar');
+  const ov = $('#sidebar-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+
+/* ══════════════════════════════════════════
+   PAGE NAVIGATION
+   ══════════════════════════════════════════ */
+function switchPage(page) {
+  currentPage = page;
+  pages.forEach(p => {
+    const pageEl = $('#page-' + p);
+    const navEl = $('#nav-' + p);
+    if (pageEl) pageEl.classList.toggle('active', p === page);
+    if (navEl) navEl.classList.toggle('active', p === page);
+  });
+  // Close mobile sidebar
+  $('#sidebar').classList.remove('open');
+  $('#sidebar-overlay').classList.remove('open');
+  // Refresh current page data
+  refreshCurrentPage();
+}
+
+/* ══════════════════════════════════════════
+   SCORE HELPERS
+   ══════════════════════════════════════════ */
+function getScoreTier(score) {
+  if (score >= 85) return 'score-tier-neon';
+  if (score >= 70) return 'score-tier-green';
+  if (score >= 50) return 'score-tier-yellow';
+  if (score >= 30) return 'score-tier-orange';
+  return 'score-tier-red';
+}
+
+function getScoreColor(score) {
+  if (score >= 85) return '#00ff88';
+  if (score >= 70) return '#44cc77';
+  if (score >= 50) return '#ffaa00';
+  if (score >= 30) return '#ff6b00';
+  return '#ff0040';
+}
+
+function getScoreLabel(score) {
+  if (score >= 85) return '极强';
+  if (score >= 70) return '强劲';
+  if (score >= 50) return '中等';
+  if (score >= 30) return '偏弱';
+  return '较弱';
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR RENDERING
+   ══════════════════════════════════════════ */
+function renderSidebarScore(kpi) {
+  if (!kpi) return;
+  const score = Math.round(kpi.score !== undefined ? kpi.score : 0);
+  const label = kpi.score_label || getScoreLabel(score);
+  const color = getScoreColor(score);
+  const deg = Math.round((score / 100) * 360);
+
+  const numEl = $('#sidebar-score-num');
+  const labelEl = $('#sidebar-score-label');
+  const ringEl = $('#sidebar-ring');
+
+  numEl.textContent = score;
+  numEl.className = 'sidebar-score-num ' + getScoreTier(score);
+  if (prevScoreNum !== null && prevScoreNum !== score) flashNum(numEl);
+  prevScoreNum = score;
+
+  labelEl.textContent = label;
+  labelEl.style.color = color;
+  ringEl.style.background = 'conic-gradient(' + color + ' 0deg, ' + color + ' ' + deg + 'deg, rgba(255,255,255,0.05) ' + deg + 'deg)';
+
+  // Score details panel
+  const detailsEl = $('#sidebar-score-details');
+  if (!detailsEl) return;
+  const dims = kpi.score_dimensions;
+  if (!dims) { detailsEl.innerHTML = ''; return; }
+
+  const dimNames = {
+    coverage: '覆盖', penetration: '渗透', output: '产出', promo: '推广', growth: '增长',
+  };
+  const dimIcons = {
+    coverage: '🌐', penetration: '🎯', output: '📤', promo: '📢', growth: '📈',
+  };
+
+  let dhtml = '<details' + (_scoreDetailsOpen ? ' open' : '') + ' ontoggle="_scoreDetailsOpen=this.open" style="margin-top:8px;font-size:11px">'
+    + '<summary style="cursor:pointer;color:#888;text-align:center;user-select:none">📊 评分规则</summary>'
+    + '<div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:6px">';
+
+  ['coverage','penetration','output','promo','growth'].forEach(key => {
+    const d = dims[key];
+    if (!d) return;
+    const pct = Math.round((d.score / d.max) * 100);
+    const barColor = pct >= 70 ? 'var(--success)' : (pct >= 30 ? 'var(--warn)' : 'var(--accent)');
+    dhtml += '<div style="margin-bottom:6px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center">'
+      + '<span>' + dimIcons[key] + ' ' + dimNames[key] + '</span>'
+      + '<span style="color:#fff;font-weight:700">' + d.score + '/' + d.max + '</span>'
+      + '</div>'
+      + '<div style="height:4px;background:rgba(255,255,255,0.05);border-radius:2px;margin:3px 0;overflow:hidden">'
+      + '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px"></div>'
+      + '</div>'
+      + '<div style="color:#555;font-size:10px">' + d.rule + '（当前: ' + d.current + '）</div>'
+      + '</div>';
+  });
+
+  dhtml += '<div style="margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);color:#555;font-size:10px;line-height:1.5">'
+    + '< 20 差 | 20-39 一般 | 40-59 良好 | 60-79 强劲 | 80+ 爆发'
+    + '</div></div></details>';
+
+  detailsEl.innerHTML = dhtml;
+}
+
+function renderSidebarPulse(kpi) {
+  if (!kpi) return;
+  const pulse = kpi.pulse || [];
+  const items = Array.isArray(pulse) ? pulse : Object.entries(pulse).map(([k, v]) => ({ label: k, ...v }));
+  const el = $('#sidebar-pulse');
+
+  if (items.length === 0) {
+    el.innerHTML = '<span class="sidebar-pulse-dot green"></span> 运行中';
+    return;
+  }
+
+  // Show first pulse item + last update time
+  const first = items[0];
+  const sec = first.seconds_ago !== undefined ? first.seconds_ago : 9999;
+  let dotCls = 'sidebar-pulse-dot ';
+  if (sec < 300) dotCls += 'green';
+  else if (sec < 1800) dotCls += 'yellow';
+  else dotCls += 'red';
+
+  const timeStr = first.ago || formatAgo(sec);
+  el.innerHTML = '<span class="' + dotCls + '"></span> '
+    + escHtml(first.label || first.name || '心跳') + ' ' + escHtml(timeStr)
+    + '<br><span style="font-size:10px;color:#555">' + new Date().toLocaleTimeString() + '</span>';
+}
+
+/* ══════════════════════════════════════════
+   OVERVIEW PAGE
+   ══════════════════════════════════════════ */
+function renderOverview(kpi) {
+  if (!kpi) return;
+  const f = kpi.funnel || {};
+
+  // KPI cards — map to actual API field names
+  const cards = [
+    { id: 'kpi-discovered', val: f.groups_discovered },
+    { id: 'kpi-speakable', val: f.groups_writable },
+    { id: 'kpi-joined', val: f.groups_joined },
+    { id: 'kpi-phase', val: f.accounts_in_promo },
+    { id: 'kpi-today', val: f.promo_messages_today },
+    { id: 'kpi-msg6h', val: (kpi.trends || {}).messages_6h },
+  ];
+  cards.forEach(c => {
+    const el = $('#' + c.id);
+    if (!el) return;
+    const val = c.val !== undefined ? c.val : '--';
+    const old = el.textContent;
+    el.textContent = typeof val === 'number' ? val.toLocaleString() : val;
+    if (old !== '--' && old !== String(val)) flashNum(el);
+  });
+
+  // Funnel — convert API object to array for rendering
+  const funnelItems = [
+    { label: '发现群', value: f.groups_discovered || 0 },
+    { label: '可发言', value: f.groups_writable || 0 },
+    { label: '已加入', value: f.groups_joined || 0 },
+    { label: 'Trust阶段', value: f.accounts_in_trust || 0 },
+    { label: 'Promote阶段', value: f.accounts_in_promo || 0 },
+    { label: '今日消息', value: f.messages_today || 0 },
+    { label: '今日推广', value: f.promo_messages_today || 0 },
+    { label: '链接分享', value: f.links_shared_today || 0 },
+  ];
+  renderFunnel(funnelItems);
+  renderMessageFunnel(kpi.message_funnel || null);
+  renderBottleneck(kpi.bottleneck || null);
+  renderTrends(kpi.trends || null);
+  renderDeliveryRate(kpi.message_funnel || null, kpi.funnel || {});
+  renderJoinFailures();
+}
+
+let _deliveryDetailsOpen = false;
+let _scoreDetailsOpen = false;
+let _joinFailOpen = false;
+
+async function renderJoinFailures() {
+  const container = $('#join-failures-card');
+  if (!container) return;
+  const data = await apiFetch('/api/join_failures');
+  if (!data) return;
+
+  const total = data.total_failures || 0;
+  const f24h = data.failures_24h || 0;
+  const success = data.total_success || 0;
+  const rate = data.success_rate || '0%';
+  const neverJoined = data.never_joined_groups || 0;
+  const blocked = data.auto_blocked_groups || 0;
+  const topFails = data.top_failing_groups || [];
+
+  let html = '<div class="card" style="padding:16px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<div style="font-weight:700;font-size:14px">❌ 加群失败</div>'
+    + '<div style="display:flex;gap:16px;font-size:13px">'
+    + '<span>总失败 <strong style="color:var(--accent)">' + total.toLocaleString() + '</strong></span>'
+    + '<span>24h <strong>' + f24h.toLocaleString() + '</strong></span>'
+    + '<span>成功率 <strong style="color:var(--success)">' + rate + '</strong></span>'
+    + '</div></div>'
+
+    + '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;color:var(--text-dim)">'
+    + '<span>✅ 成功加入: ' + success + '</span>'
+    + '<span>⏳ 待尝试: ' + neverJoined + '</span>'
+    + '<span>🚫 已拉黑: ' + blocked + '</span>'
+    + '</div>';
+
+  // Expandable details
+  html += '<details' + (_joinFailOpen ? ' open' : '') + ' ontoggle="_joinFailOpen=this.open" style="margin-top:10px;font-size:12px">'
+    + '<summary style="cursor:pointer;color:#888;user-select:none">📋 失败最多的群 TOP 10</summary>'
+    + '<table class="data-table" style="margin-top:8px;font-size:12px">'
+    + '<thead><tr><th>群</th><th>失败次数</th></tr></thead><tbody>';
+
+  topFails.forEach(f => {
+    html += '<tr>'
+      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(f.title) + '">' + escHtml(f.group || '-') + '</td>'
+      + '<td style="color:var(--accent)">' + f.fails + '</td>'
+      + '</tr>';
+  });
+
+  html += '</tbody></table></details></div>';
+  container.innerHTML = html;
+}
+function renderDeliveryRate(mf, funnel) {
+  const container = $('#delivery-rate-card');
+  if (!container) return;
+
+  const attempts = (mf && mf.phase_attempts) || 0;
+  const sent = (mf && mf.messages_sent) || funnel.messages_today || 0;
+  const rateStr = (mf && mf.success_rate) || (attempts > 0 ? (sent / attempts * 100).toFixed(1) + '%' : '0%');
+  const rateNum = parseFloat(rateStr) || 0;
+
+  // Color based on rate
+  let color = 'var(--accent)';  // red < 10%
+  if (rateNum >= 30) color = 'var(--success)';
+  else if (rateNum >= 10) color = 'var(--warn)';
+
+  // Progress bar width
+  const barW = Math.min(100, Math.max(1, rateNum));
+
+  let html = '<div class="card" style="padding:16px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<div style="font-weight:700;font-size:14px">📬 消息投递率</div>'
+    + '<div style="font-size:28px;font-weight:800;color:' + color + ';font-family:var(--font-mono)">' + rateStr + '</div>'
+    + '</div>'
+    + '<div style="height:8px;background:rgba(255,255,255,0.05);border-radius:4px;margin:10px 0 8px;overflow:hidden">'
+    + '<div style="height:100%;width:' + barW + '%;background:' + color + ';border-radius:4px;transition:width 0.8s"></div>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim)">'
+    + '<span>发言尝试: ' + attempts.toLocaleString() + '</span>'
+    + '<span>成功发出: ' + sent.toLocaleString() + '</span>'
+    + '</div>';
+
+  // Expandable explanation (preserve open state across refreshes)
+  html += '<details' + (_deliveryDetailsOpen ? ' open' : '') + ' ontoggle="_deliveryDetailsOpen=this.open" style="margin-top:10px;font-size:12px;color:var(--text-dim)">'
+    + '<summary style="cursor:pointer;color:#888;user-select:none">ℹ️ 投递率怎么算的？</summary>'
+    + '<div style="margin-top:8px;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;line-height:1.6">'
+    + '<strong style="color:#ccc">投递率 = 成功发出的消息 ÷ 发言尝试次数</strong><br><br>'
+    + '发言尝试 = 系统进入 trust_building 或 soft_promotion 阶段并尝试发消息的次数<br><br>'
+    + '消息可能在以下环节丢失：<br>'
+    + '&nbsp;&nbsp;1. <span style="color:#ff6b6b">读群消息失败</span> — FloodWait / entity 解析失败<br>'
+    + '&nbsp;&nbsp;2. <span style="color:#ffa500">内容生成失败</span> — AI API 超时 / 模板兜底也失败<br>'
+    + '&nbsp;&nbsp;3. <span style="color:#ff4444">Telegram 拒绝</span> — ChatAdminRequired（只读群）/ PeerIdInvalid<br><br>'
+    + '<strong style="color:#ccc">健康值参考：</strong><br>'
+    + '&nbsp;&nbsp;<span style="color:var(--accent)">< 10%</span> 严重异常 &nbsp;|&nbsp; '
+    + '<span style="color:var(--warn)">10-30%</span> 需优化 &nbsp;|&nbsp; '
+    + '<span style="color:var(--success)">> 30%</span> 正常'
+    + '</div></details>';
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderFunnel(funnel) {
+  if (!funnel || !funnel.length) return;
+  const container = $('#funnel-container');
+  const maxVal = funnel[0].value || 1;
+
+  let html = '';
+  funnel.forEach((item, i) => {
+    const pct = maxVal > 0 ? (item.value / maxVal * 100) : 0;
+    const pctStr = i === 0 ? '100%' : (maxVal > 0 ? (item.value / maxVal * 100).toFixed(1) + '%' : '0%');
+    const prevKey = item.label;
+    const changed = prevFunnelNums[prevKey] !== undefined && prevFunnelNums[prevKey] !== item.value;
+    prevFunnelNums[prevKey] = item.value;
+
+    html += '<div class="funnel-row">'
+      + '<span class="funnel-label">' + escHtml(item.label) + '</span>'
+      + '<span class="funnel-num' + (changed ? ' num-flash' : '') + '">' + item.value.toLocaleString() + '</span>'
+      + '<div class="funnel-bar-wrap"><div class="funnel-bar fb-' + i + '" style="width:' + Math.max(pct, 0.5) + '%"></div></div>'
+      + '<span class="funnel-pct">' + pctStr + '</span>'
+      + '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function renderMessageFunnel(mf) {
+  const container = $('#msg-funnel-container');
+  if (!mf || !container) return;
+
+  const attempts = mf.phase_attempts || 0;
+  // Build waterfall: each step subtracts failures
+  const sendFailed = mf.send_failed || 0;
+  const contentFailed = mf.content_gen_failed || 0;
+  const tgRejected = mf.telegram_rejected || 0;
+  const sent = mf.messages_sent || 0;
+  const rate = mf.success_rate || 'N/A';
+
+  // Approximate intermediate steps
+  const afterFailures = Math.max(sent, attempts - sendFailed - contentFailed - tgRejected);
+  const steps = [
+    { label: '发言尝试', value: attempts },
+    { label: '内容生成成功', value: Math.max(sent, attempts - contentFailed) },
+    { label: '发送尝试', value: Math.max(sent, attempts - contentFailed - sendFailed) },
+    { label: '发送成功', value: sent },
+  ];
+  const maxVal = steps[0].value || 1;
+
+  let html = '';
+  steps.forEach((item, i) => {
+    const pct = maxVal > 0 ? (item.value / maxVal * 100) : 0;
+    const pctStr = i === 0 ? '100%' : (maxVal > 0 ? (item.value / maxVal * 100).toFixed(1) + '%' : '0%');
+    html += '<div class="funnel-row">'
+      + '<span class="funnel-label">' + escHtml(item.label) + '</span>'
+      + '<span class="funnel-num">' + item.value.toLocaleString() + '</span>'
+      + '<div class="funnel-bar-wrap"><div class="funnel-bar" style="width:' + Math.max(pct, 0.5) + '%;background:linear-gradient(90deg,#ff6b00,' + (i < 2 ? '#ffaa00' : i < 3 ? '#ff0040' : '#00ff88') + ')"></div></div>'
+      + '<span class="funnel-pct">' + pctStr + '</span>'
+      + '</div>';
+  });
+
+  // Summary line
+  html += '<div style="margin-top:8px;font-size:12px;color:var(--text-dim);display:flex;gap:16px;flex-wrap:wrap">'
+    + '<span>投递率: <strong style="color:' + (sent / Math.max(attempts,1) < 0.1 ? 'var(--accent)' : 'var(--success)') + '">' + rate + '</strong></span>'
+    + '<span>发送失败: ' + sendFailed + '</span>'
+    + '<span>内容失败: ' + contentFailed + '</span>'
+    + '<span>TG拒绝: ' + tgRejected + '</span>'
+    + '</div>';
+
+  container.innerHTML = html;
+}
+
+function renderBottleneck(bn) {
+  const container = $('#bottleneck-container');
+  if (!bn) {
+    container.innerHTML = '<div class="alert-box alert-green"><div class="alert-title">✅ 系统运行良好</div></div>';
+    return;
+  }
+  const isOk = bn.id === 'ok';
+  const severity = bn.severity || (isOk ? 'none' : 'high');
+  let cls = 'alert-box';
+  if (severity === 'low' || severity === 'none' || isOk) cls += ' alert-green';
+  else if (severity === 'medium') cls += ' alert-orange';
+
+  const title = bn.title || bn.label || '瓶颈检测';
+  const desc = bn.description || bn.detail || '';
+
+  let html = '<div class="' + cls + '">';
+  html += '<div class="alert-title">' + (isOk || severity === 'low' || severity === 'none' ? '✅ ' : '⚠️ ') + escHtml(title) + '</div>';
+  if (desc) html += '<div class="alert-desc">' + escHtml(desc) + '</div>';
+  if (bn.suggestion) html += '<div class="alert-tip">💡 ' + escHtml(bn.suggestion) + '</div>';
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderIdleAlert(data) {
+  if (!data) return;
+  const accounts = Array.isArray(data) ? data : (data.accounts || []);
+  let idleCount = 0;
+  let readonlyPending = 0;
+  accounts.forEach(a => {
+    const groups = a.groups || [];
+    const speakable = groups.filter(g => g.status !== 'readonly').length;
+    if (speakable === 0) idleCount++;
+    readonlyPending += groups.filter(g => g.status === 'readonly').length;
+  });
+  const container = $('#bottleneck-container');
+  if (!container) return;
+  // Append idle-account alert below existing bottleneck content
+  let existing = container.querySelector('#idle-alert');
+  if (existing) existing.remove();
+  if (idleCount > 0 || readonlyPending > 0) {
+    const div = document.createElement('div');
+    div.id = 'idle-alert';
+    div.className = 'alert-box';
+    div.style.marginTop = '10px';
+    const parts = [];
+    if (idleCount > 0) parts.push('⚠️ <strong>' + idleCount + '</strong> 个账号完全闲置（无可发言群）');
+    if (readonlyPending > 0) parts.push('<strong>' + readonlyPending + '</strong> 个 readonly 群中账号待退出');
+    div.innerHTML = '<div class="alert-title">' + parts.join(' &nbsp;|&nbsp; ') + '</div>';
+    container.appendChild(div);
+  }
+}
+
+function renderTrends(trends) {
+  if (!trends) return;
+  const periods = [
+    { key: '1h', el: $('#trend-1h') },
+    { key: '6h', el: $('#trend-6h') },
+    { key: '24h', el: $('#trend-24h') },
+  ];
+  periods.forEach(p => {
+    const data = trends[p.key];
+    if (!data || !p.el) return;
+    const metrics = [
+      { key: 'messages', icon: '💬', label: '消息' },
+      { key: 'promos', icon: '📢', label: '推广' },
+      { key: 'joins', icon: '➕', label: '加群' },
+      { key: 'discovered', icon: '🔍', label: '发现' },
+    ];
+    let html = '';
+    metrics.forEach(m => {
+      const v = data[m.key] !== undefined ? data[m.key] : '--';
+      const tKey = p.key + '_' + m.key;
+      const changed = prevTrendNums[tKey] !== undefined && prevTrendNums[tKey] !== v;
+      prevTrendNums[tKey] = v;
+      html += '<div class="trend-item">'
+        + '<div class="trend-num' + (changed ? ' num-flash' : '') + '">' + v + '</div>'
+        + '<div class="trend-label">' + m.icon + ' ' + m.label + '</div>'
+        + '</div>';
+    });
+    p.el.innerHTML = html;
+  });
+}
+
+/* ══════════════════════════════════════════
+   ACCOUNTS PAGE
+   ══════════════════════════════════════════ */
+function renderAccounts(data) {
+  if (!data) return;
+  const accounts = Array.isArray(data) ? data : (data.accounts || []);
+  $('#accounts-count').textContent = accounts.length + ' 个账号';
+
+  if (accounts.length === 0) {
+    $('#accounts-grid').innerHTML = '<div class="loading-msg">暂无数据</div>';
+    $('#accounts-summary').innerHTML = '';
+    return;
+  }
+
+  // Compute summary stats
+  let idleCount = 0;
+  let readonlyPendingCount = 0;
+  accounts.forEach(a => {
+    const groups = a.groups || [];
+    const speakable = groups.filter(g => g.status !== 'readonly').length;
+    if (speakable === 0) idleCount++;
+    readonlyPendingCount += groups.filter(g => g.status === 'readonly').length;
+  });
+
+  let summaryHtml = '';
+  if (idleCount > 0 || readonlyPendingCount > 0) {
+    summaryHtml = '<div class="alert-box" style="margin-bottom:12px;padding:10px 14px;font-size:13px">';
+    const parts = [];
+    if (idleCount > 0) parts.push('<span style="color:var(--accent);font-weight:700">⚠️ ' + idleCount + ' 个账号完全闲置</span>');
+    if (readonlyPendingCount > 0) parts.push('<span style="color:var(--warn)">' + readonlyPendingCount + ' 个 readonly 群待退出</span>');
+    summaryHtml += parts.join(' &nbsp;|&nbsp; ') + '</div>';
+  }
+  $('#accounts-summary').innerHTML = summaryHtml;
+
+  // Table header
+  let html = '<div class="account-card" style="border:none;background:none;padding:0">'
+    + '<div class="account-row" style="cursor:default;padding:6px 14px;border-bottom:1px solid rgba(255,255,255,0.05)">'
+    + '<div class="account-status-dot" style="visibility:hidden"></div>'
+    + '<div class="account-id" style="color:var(--text-dim);font-size:11px">ID</div>'
+    + '<div class="account-phone" style="color:var(--text-dim);font-size:11px">手机号</div>'
+    + '<div class="account-stat" style="font-size:11px">可发言群</div>'
+    + '<div class="account-stat" style="font-size:11px">今日消息</div>'
+    + '<div class="account-stat" style="font-size:11px">今日推广</div>'
+    + '<div class="account-stat" style="font-size:11px">风险</div>'
+    + '<div class="account-stat" style="font-size:11px;min-width:50px">状态</div>'
+    + '<div class="account-expand-btn" style="visibility:hidden">▼</div>'
+    + '</div></div>';
+
+  accounts.forEach(a => {
+    const online = a.status === 'active' || a.status === 'online' || a.connected;
+    const groups = a.groups || [];
+    const gCount = groups.length;
+    const speakable = groups.filter(g => g.status !== 'readonly').length;
+    const readonlyCount = gCount - speakable;
+    const isIdle = speakable === 0;
+    const isExpanded = expandedAccounts[a.id] || false;
+    const msgs = a.messages_sent_today || 0;
+    const promo = a.promo_messages_today || 0;
+    const risk = (a.risk_score || 0).toFixed(2);
+
+    html += '<div class="account-card' + (isExpanded ? ' expanded' : '') + '" data-acct-id="' + a.id + '">'
+      + '<div class="account-row" onclick="toggleAccount(' + a.id + ')">'
+      + '<div class="account-status-dot" style="background:' + (online ? 'var(--success)' : 'var(--accent)') + '"></div>'
+      + '<div class="account-id">#' + a.id + '</div>'
+      + '<div class="account-phone">' + escHtml(a.phone || '-') + '</div>'
+      + '<div class="account-stat"><div class="account-stat-val">' + speakable + '</div></div>'
+      + '<div class="account-stat"><div class="account-stat-val">' + msgs + '</div></div>'
+      + '<div class="account-stat"><div class="account-stat-val">' + promo + '</div></div>'
+      + '<div class="account-stat"><div class="account-stat-val" style="font-size:13px;color:' + (risk > 0.3 ? 'var(--accent)' : 'var(--text-dim)') + '">' + risk + '</div></div>'
+      + '<div class="account-stat" style="min-width:50px">' + (isIdle ? '<span class="account-idle-tag">⚠️闲置</span>' : '<span style="color:var(--success);font-size:11px">正常</span>') + '</div>'
+      + '<div class="account-expand-btn">▼</div>'
+      + '</div>'
+      + '<div class="account-groups-inner">';
+
+    if (gCount === 0) {
+      html += '<div style="color:#555;font-size:12px">暂无加入群</div>';
+    } else {
+      const speakableGrps = groups.filter(g => g.status !== 'readonly');
+      const roGrps = groups.filter(g => g.status === 'readonly');
+
+      // Summary line: 有效群 X | 只读 Y
+      html += '<div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;display:flex;gap:12px;align-items:center">'
+        + '<span style="color:var(--success)">有效群 ' + speakableGrps.length + '</span>'
+        + '<span>只读 ' + roGrps.length + '</span>';
+      if (roGrps.length > 0) {
+        html += '<span class="toggle-ro-btn" onclick="event.stopPropagation();toggleReadonly(' + a.id + ')" style="color:var(--accent);cursor:pointer;font-size:11px;text-decoration:underline">'
+          + (showReadonlyAccounts[a.id] ? '隐藏只读' : '显示只读') + '</span>';
+      }
+      html += '</div>';
+
+      // Active groups table
+      if (speakableGrps.length > 0) {
+        html += '<table class="data-table" style="font-size:12px">'
+          + '<thead><tr><th>群</th><th>成员</th><th>评级</th><th>阶段</th></tr></thead><tbody>';
+        speakableGrps.forEach(g => {
+          const grade = g.grade || '-';
+          const phase = g.phase || '-';
+          const phaseColor = {'潜水':'#666','闲聊':'var(--warn)','推广':'var(--success)'}[phase] || '#888';
+          const phaseIcon = {'潜水':'🤫','闲聊':'💬','推广':'📢'}[phase] || '❓';
+          html += '<tr>'
+            + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(g.title || g.tg_group_id || '') + '">' + escHtml(g.title || g.tg_group_id || '-') + '</td>'
+            + '<td>' + (g.member_count || 0).toLocaleString() + '</td>'
+            + '<td><span class="badge badge-' + grade + '">' + grade + '</span></td>'
+            + '<td style="color:' + phaseColor + '">' + phaseIcon + ' ' + phase + '</td>'
+            + '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+
+      // Readonly groups (hidden by default, toggle to show)
+      if (roGrps.length > 0) {
+        const roVis = showReadonlyAccounts[a.id] ? 'block' : 'none';
+        html += '<div class="ro-groups-' + a.id + '" style="display:' + roVis + ';margin-top:6px">'
+          + '<div style="font-size:11px;color:#555;margin-bottom:4px">🔒 只读群</div>'
+          + '<table class="data-table" style="font-size:12px">'
+          + '<thead><tr><th>群</th><th>成员</th><th>评级</th><th>状态</th></tr></thead><tbody>';
+        roGrps.forEach(g => {
+          const grade = g.grade || '-';
+          html += '<tr style="color:#555">'
+            + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(g.title || g.tg_group_id || '') + '">🔒 ' + escHtml(g.title || g.tg_group_id || '-') + '</td>'
+            + '<td>' + (g.member_count || 0).toLocaleString() + '</td>'
+            + '<td><span class="badge badge-' + grade + '">' + grade + '</span></td>'
+            + '<td>🔒 只读</td>'
+            + '</tr>';
+        });
+        html += '</tbody></table></div>';
+      }
+    }
+    html += '</div></div>';
+  });
+  $('#accounts-grid').innerHTML = html;
+}
+
+function toggleAccount(id) {
+  expandedAccounts[id] = !expandedAccounts[id];
+  const cards = $$('.account-card[data-acct-id="' + id + '"]');
+  cards.forEach(c => c.classList.toggle('expanded', expandedAccounts[id]));
+}
+
+function toggleReadonly(id) {
+  showReadonlyAccounts[id] = !showReadonlyAccounts[id];
+  // Toggle visibility of readonly groups container
+  const roDiv = document.querySelector('.ro-groups-' + id);
+  if (roDiv) {
+    roDiv.style.display = showReadonlyAccounts[id] ? 'block' : 'none';
+  }
+  // Update button text
+  const btns = $$('.toggle-ro-btn');
+  btns.forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes('toggleReadonly(' + id + ')')) {
+      b.textContent = showReadonlyAccounts[id] ? '隐藏只读' : '显示只读';
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   GROUPS PAGE
+   ══════════════════════════════════════════ */
+function renderGroups(data) {
+  if (!data) return;
+  const groups = data.groups || data;
+  const total = data.total || (Array.isArray(groups) ? groups.length : 0);
+  const perPage = data.per_page || 50;
+  const totalPages = Math.ceil(total / perPage) || 1;
+
+  $('#groups-count').textContent = total + ' 个群';
+
+  // Fetch and render join trend chart
+  renderJoinTrend();
+
+  if (!Array.isArray(groups) || groups.length === 0) {
+    $('#groups-table-wrap').innerHTML = '<div class="loading-msg">暂无数据</div>';
+    $('#groups-pagination').innerHTML = '';
+    return;
+  }
+
+  let html = '<table class="data-table"><thead><tr>'
+    + '<th>群名</th><th>成员数</th><th>评级</th><th>状态</th><th>我方号</th><th>加入时间</th>'
+    + '</tr></thead><tbody>';
+  groups.forEach(g => {
+    const grade = g.grade || '-';
+    const statusIcon = (g.status === 'readonly') ? '🔒' : '✅';
+    const joinedAt = g.first_joined_at;
+    let joinedStr = '-';
+    if (joinedAt) {
+      const d = new Date(joinedAt);
+      const now = new Date();
+      const diffH = Math.round((now - d) / 3600000);
+      if (diffH < 1) joinedStr = '刚刚';
+      else if (diffH < 24) joinedStr = diffH + 'h前';
+      else joinedStr = Math.round(diffH / 24) + '天前';
+    }
+    const accounts = g.our_accounts || 0;
+    html += '<tr>'
+      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(g.title || g.tg_group_id || '') + '">' + escHtml(g.title || g.tg_group_id || '-') + '</td>'
+      + '<td>' + (g.member_count || 0).toLocaleString() + '</td>'
+      + '<td><span class="badge badge-' + grade + '">' + grade + '</span></td>'
+      + '<td>' + statusIcon + '</td>'
+      + '<td>' + (accounts > 0 ? accounts : '<span style="color:#555">-</span>') + '</td>'
+      + '<td style="font-size:12px;color:' + (joinedAt ? 'var(--success)' : '#555') + '">' + joinedStr + '</td>'
+      + '</tr>';
+  });
+  html += '</tbody></table>';
+  $('#groups-table-wrap').innerHTML = html;
+
+  // Pagination
+  let pgHtml = '<button class="page-btn" onclick="changeGroupPage(' + (groupPage - 1) + ')"' + (groupPage <= 1 ? ' disabled' : '') + '>&laquo; 上一页</button>'
+    + '<span class="page-info">第 ' + groupPage + ' / ' + totalPages + ' 页</span>'
+    + '<button class="page-btn" onclick="changeGroupPage(' + (groupPage + 1) + ')"' + (groupPage >= totalPages ? ' disabled' : '') + '>下一页 &raquo;</button>';
+  $('#groups-pagination').innerHTML = pgHtml;
+}
+
+async function renderJoinTrend() {
+  const data = await apiFetch('/api/join_trend');
+  if (!data) return;
+  const points = data.points || [];
+  const summary = data.summary || {};
+  const chart = $('#join-trend-chart');
+  const sumEl = $('#join-trend-summary');
+
+  if (sumEl) {
+    sumEl.innerHTML = '6h: <strong>' + (summary.last_6h || 0) + '</strong> | '
+      + '24h: <strong>' + (summary.last_24h || 0) + '</strong> | '
+      + '均速: <strong>' + (summary.avg_per_hour_24h || 0) + '</strong>/h';
+  }
+
+  if (!chart || points.length === 0) {
+    if (chart) chart.innerHTML = '<div style="color:#555;font-size:12px;text-align:center;padding:20px">暂无数据</div>';
+    return;
+  }
+
+  // SVG line chart with axes
+  const W = 700, H = 140;
+  const padL = 35, padR = 10, padT = 10, padB = 30;
+  const cW = W - padL - padR;
+  const cH = H - padT - padB;
+  const maxVal = Math.max(1, ...points.map(p => p.joins));
+  const n = points.length;
+
+  // Build path
+  const coords = points.map((p, i) => {
+    const x = padL + (i / Math.max(n - 1, 1)) * cW;
+    const y = padT + cH - (p.joins / maxVal) * cH;
+    return { x, y, p };
+  });
+  const linePath = coords.map((c, i) => (i === 0 ? 'M' : 'L') + c.x.toFixed(1) + ',' + c.y.toFixed(1)).join(' ');
+  const areaPath = linePath + ' L' + coords[coords.length - 1].x.toFixed(1) + ',' + (padT + cH) + ' L' + coords[0].x.toFixed(1) + ',' + (padT + cH) + ' Z';
+
+  let svg = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" style="display:block">';
+
+  // Grid lines + Y axis labels
+  const yTicks = 4;
+  for (let i = 0; i <= yTicks; i++) {
+    const val = Math.round(maxVal * (1 - i / yTicks));
+    const y = padT + (i / yTicks) * cH;
+    svg += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="rgba(255,255,255,0.05)" />';
+    svg += '<text x="' + (padL - 5) + '" y="' + (y + 4) + '" fill="#666" font-size="10" text-anchor="end">' + val + '</text>';
+  }
+
+  // Area fill
+  svg += '<path d="' + areaPath + '" fill="rgba(0,255,136,0.08)" />';
+
+  // Line
+  svg += '<path d="' + linePath + '" fill="none" stroke="#00ff88" stroke-width="2" />';
+
+  // Dots + X axis labels (every 6 hours)
+  coords.forEach((c, i) => {
+    // Dot
+    svg += '<circle cx="' + c.x.toFixed(1) + '" cy="' + c.y.toFixed(1) + '" r="3" fill="#00ff88" stroke="#0a0e1a" stroke-width="1.5">'
+      + '<title>' + new Date(c.p.hour).getHours() + ':00 — ' + c.p.joins + ' 个加群</title></circle>';
+    // X label every 6h or first/last
+    const hour = new Date(c.p.hour).getHours();
+    if (i === 0 || i === n - 1 || hour % 6 === 0) {
+      const d = new Date(c.p.hour);
+      const label = (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(hour).padStart(2, '0') + ':00';
+      svg += '<text x="' + c.x.toFixed(1) + '" y="' + (H - 5) + '" fill="#666" font-size="9" text-anchor="middle">' + label + '</text>';
+    }
+  });
+
+  // Axis labels
+  svg += '<text x="' + (padL / 2) + '" y="' + (padT - 2) + '" fill="#888" font-size="9" text-anchor="middle">加群数</text>';
+  svg += '<text x="' + (W / 2) + '" y="' + (H - 0) + '" fill="#888" font-size="9" text-anchor="middle">时间</text>';
+
+  svg += '</svg>';
+  chart.innerHTML = svg;
+}
+
+function filterGroups(grade) {
+  currentGradeFilter = grade;
+  groupPage = 1;
+  $$('#group-filters .grade-btn').forEach(b => b.classList.toggle('active', b.dataset.grade === grade));
+  refreshCurrentPage();
+}
+
+function filterStatus(status) {
+  currentStatusFilter = status;
+  groupPage = 1;
+  $$('#status-filter .status-btn').forEach(b => b.classList.toggle('active', b.dataset.status === status));
+  refreshCurrentPage();
+}
+
+function changeGroupPage(page) {
+  if (page < 1) return;
+  groupPage = page;
+  refreshCurrentPage();
+}
+
+/* ══════════════════════════════════════════
+   PROMO PAGE
+   ══════════════════════════════════════════ */
+function renderPromo(data) {
+  if (!data) {
+    $('#promo-success-rate').innerHTML = '<div class="loading-msg">数据加载中...</div>';
+    return;
+  }
+
+  // Success rate
+  const total = data.total_sent || data.total || 0;
+  const success = data.success || data.delivered || 0;
+  const rate = total > 0 ? ((success / total) * 100).toFixed(1) : 0;
+  let rateHtml = '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'
+    + '<span style="color:var(--text-dim)">成功率</span>'
+    + '<span style="color:var(--num);font-weight:700;font-family:var(--font-mono)">' + rate + '%</span></div>'
+    + '<div class="progress-wrap"><div class="progress-bar" style="width:' + rate + '%">' + rate + '%</div></div>'
+    + '<div style="display:flex;gap:20px;margin-top:10px;font-size:12px;color:var(--text-dim)">'
+    + '<span>总发送: ' + total + '</span><span>成功: ' + success + '</span><span>失败: ' + (data.failed || total - success) + '</span></div>';
+  $('#promo-success-rate').innerHTML = rateHtml;
+
+  // Error classification
+  const errors = data.errors || data.error_types || {};
+  let errHtml = '';
+  if (Object.keys(errors).length === 0) {
+    errHtml = '<div style="font-size:13px;color:var(--text-dim)">暂无错误</div>';
+  } else {
+    Object.entries(errors).forEach(([k, v]) => {
+      errHtml += '<div class="promo-stat-row">'
+        + '<span class="promo-stat-label">' + escHtml(k) + '</span>'
+        + '<span class="promo-stat-val">' + v + '</span></div>';
+    });
+  }
+  $('#promo-errors').innerHTML = errHtml;
+
+  // By group top 10
+  const byGroup = data.by_group || data.top_groups || [];
+  let grpHtml = '';
+  if (byGroup.length === 0) {
+    grpHtml = '<div style="font-size:13px;color:var(--text-dim)">暂无数据</div>';
+  } else {
+    grpHtml = '<div class="top-list">';
+    byGroup.slice(0, 10).forEach((g, i) => {
+      grpHtml += '<div class="top-item">'
+        + '<span class="top-rank">' + (i + 1) + '</span>'
+        + '<span class="top-name">' + escHtml(g.name || g.title || g.group || '-') + '</span>'
+        + '<span class="top-val">' + (g.count || g.sent || 0) + '</span></div>';
+    });
+    grpHtml += '</div>';
+  }
+  $('#promo-by-group').innerHTML = grpHtml;
+
+  // By account
+  const byAccount = data.by_account || data.top_accounts || [];
+  let acctHtml = '';
+  if (byAccount.length === 0) {
+    acctHtml = '<div style="font-size:13px;color:var(--text-dim)">暂无数据</div>';
+  } else {
+    acctHtml = '<div class="top-list">';
+    byAccount.forEach((a, i) => {
+      acctHtml += '<div class="top-item">'
+        + '<span class="top-rank">' + (i + 1) + '</span>'
+        + '<span class="top-name">#' + (a.id || a.account_id || i) + ' ' + escHtml(a.phone || a.name || '') + '</span>'
+        + '<span class="top-val">' + (a.count || a.sent || 0) + '</span></div>';
+    });
+    acctHtml += '</div>';
+  }
+  $('#promo-by-account').innerHTML = acctHtml;
+}
+
+function renderPhaseDistribution(data) {
+  if (!data) {
+    $('#promo-phases').innerHTML = '<div class="loading-msg">数据加载中...</div>';
+    return;
+  }
+  const phases = Array.isArray(data) ? data : (data.phases || data.distribution || []);
+  if (phases.length === 0) {
+    $('#promo-phases').innerHTML = '<div style="font-size:13px;color:var(--text-dim)">暂无数据</div>';
+    return;
+  }
+
+  const maxVal = Math.max(...phases.map(p => p.count || p.value || 0), 1);
+  const colors = ['#4488ff', '#22aa66', '#aaaa22', '#dd8822', '#dd4422', '#cc2244', '#ff0080'];
+  let html = '<div class="phase-bars">';
+  phases.forEach((p, i) => {
+    const val = p.count || p.value || 0;
+    const pct = (val / maxVal * 100).toFixed(1);
+    html += '<div class="phase-bar-row">'
+      + '<span class="phase-bar-label">' + escHtml(p.name || p.phase || p.label || ('Phase ' + i)) + '</span>'
+      + '<div class="phase-bar-track"><div class="phase-bar-fill" style="width:' + pct + '%;background:' + (colors[i % colors.length]) + '"></div></div>'
+      + '<span class="phase-bar-val">' + val + '</span></div>';
+  });
+  html += '</div>';
+  $('#promo-phases').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════
+   ACTIVITY PAGE
+   ══════════════════════════════════════════ */
+function renderActivity(data) {
+  if (!data) return;
+  const items = Array.isArray(data) ? data : (data.events || data.activities || []);
+  $('#activity-count').textContent = items.length + ' 条记录';
+
+  if (items.length === 0) {
+    $('#activity-timeline').innerHTML = '<div class="loading-msg">暂无活动</div>';
+    return;
+  }
+
+  let html = '';
+  items.slice(0, 100).forEach(item => {
+    const time = item.time || item.timestamp || '';
+    const short = typeof time === 'string' ? time.slice(11, 19) : '';
+    const text = item.text || item.message || item.event || JSON.stringify(item);
+
+    // Determine type for icon + dot color
+    let type = 'default';
+    let icon = '📌';
+    const lc = text.toLowerCase();
+    if (/link|链接|url/i.test(lc)) { type = 'link'; icon = '🔗'; }
+    else if (/消息|message|msg|sent/i.test(lc)) { type = 'message'; icon = '💬'; }
+    else if (/加群|join|加入/i.test(lc)) { type = 'join'; icon = '✅'; }
+    else if (/发现|discover|found|search/i.test(lc)) { type = 'discover'; icon = '🔍'; }
+
+    html += '<div class="timeline-item type-' + type + '">'
+      + '<div class="timeline-time">' + escHtml(short) + '</div>'
+      + '<div class="timeline-text"><span class="timeline-icon">' + icon + '</span>' + escHtml(text) + '</div>'
+      + '</div>';
+  });
+  $('#activity-timeline').innerHTML = html;
+}
+
+/* ══════════════════════════════════════════
+   LOGS PAGE
+   ══════════════════════════════════════════ */
+function renderLogs(data) {
+  if (!data) return;
+  const lines = Array.isArray(data) ? data : (data.lines || data.logs || []);
+  $('#logs-count').textContent = lines.length + ' 行';
+
+  const container = $('#log-container');
+  // Remember scroll position
+  const wasAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 20;
+  const scrollPos = container.scrollTop;
+
+  let html = '';
+  lines.forEach(line => {
+    const text = typeof line === 'string' ? line : (line.text || line.message || JSON.stringify(line));
+    let cls = '';
+    if (/error|fail|exception/i.test(text)) cls = 'log-err';
+    else if (/warn/i.test(text)) cls = 'log-warn';
+    else if (/success|done|complete/i.test(text)) cls = 'log-success';
+    else if (/info|start|init/i.test(text)) cls = 'log-info';
+
+    // Highlight timestamp
+    const highlighted = text.replace(/^(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}[^ ]*)/, '<span class="log-ts">$1</span>');
+    html += '<div class="log-line"><span class="' + cls + '">' + highlighted + '</span></div>';
+  });
+  container.innerHTML = html;
+
+  // Don't auto-scroll — preserve user position
+  if (!wasAtBottom) {
+    container.scrollTop = scrollPos;
+  }
+}
+
+/* ══════════════════════════════════════════
+   MAIN REFRESH LOGIC
+   ══════════════════════════════════════════ */
+async function refreshCurrentPage() {
+  // Always refresh sidebar score + pulse
+  try {
+    const kpi = await apiFetch('/api/kpi');
+    if (kpi) {
+      renderSidebarScore(kpi);
+      renderSidebarPulse(kpi);
+
+      // Only render current page
+      switch (currentPage) {
+        case 'overview':
+          renderOverview(kpi);
+          // Also fetch accounts to show idle-account alert in bottleneck area
+          try {
+            const acctData = await apiFetch('/api/accounts');
+            renderIdleAlert(acctData);
+          } catch (_e) { /* best-effort */ }
+          break;
+      }
+    }
+  } catch (e) {
+    console.warn('KPI refresh error:', e);
+  }
+
+  // Fetch page-specific data
+  try {
+    switch (currentPage) {
+      case 'accounts':
+        renderAccounts(await apiFetch('/api/accounts'));
+        break;
+      case 'groups': {
+        let url = '/api/groups?page=' + groupPage + '&sort=joined';
+        if (currentGradeFilter) url += '&grade=' + currentGradeFilter;
+        if (currentStatusFilter) url += '&status=' + currentStatusFilter;
+        renderGroups(await apiFetch(url));
+        break;
+      }
+      case 'promo': {
+        const [promoData, phaseData] = await Promise.all([
+          apiFetch('/api/promo_stats'),
+          apiFetch('/api/phase_distribution')
+        ]);
+        renderPromo(promoData);
+        renderPhaseDistribution(phaseData);
+        break;
+      }
+      case 'activity':
+        renderActivity(await apiFetch('/api/activity'));
+        break;
+      case 'logs':
+        renderLogs(await apiFetch('/api/logs?lines=80'));
+        break;
+      case 'msgview':
+        await refreshMsgView();
+        break;
+    }
+  } catch (e) {
+    console.warn('Page refresh error:', e);
+  }
+}
+
+// Initial load + 8s interval
+refreshCurrentPage();
+setInterval(refreshCurrentPage, 8000);
+/* ══════════════════════════════════════════
+   MESSAGE VIEW PAGE
+   ══════════════════════════════════════════ */
+let msgViewAccount = 'all';
+let msgViewAccountsLoaded = false;
+
+function selectMsgAccount(acct) {
+  msgViewAccount = acct;
+  // Update button states
+  $$('#page-msgview .grade-btn').forEach(b => b.classList.toggle('active', b.dataset.acct === String(acct)));
+  refreshMsgView();
+}
+
+async function refreshMsgView() {
+  // Load account buttons once
+  if (!msgViewAccountsLoaded) {
+    const acctData = await apiFetch('/api/accounts');
+    if (acctData) {
+      const accounts = acctData.accounts || [];
+      const btnContainer = $('#msg-account-btns');
+      if (btnContainer) {
+        let btns = '';
+        accounts.forEach(a => {
+          btns += '<button class="grade-btn' + (msgViewAccount === String(a.id) ? ' active' : '') + '" data-acct="' + a.id + '" onclick="selectMsgAccount(\'' + a.id + '\')">#' + a.id + '</button>';
+        });
+        btnContainer.innerHTML = btns;
+      }
+      msgViewAccountsLoaded = true;
+    }
+  }
+
+  // Fetch messages
+  let url = '/api/messages?limit=200';
+  if (msgViewAccount !== 'all') url += '&account_id=' + msgViewAccount;
+  const data = await apiFetch(url);
+  if (!data) return;
+
+  const messages = data.messages || [];
+  const statsEl = $('#msg-stats');
+  const listEl = $('#msg-list');
+
+  // Stats
+  const totalCount = messages.length;
+  const promoCount = messages.filter(m => m.is_promo).length;
+  const linkCount = messages.filter(m => m.content && m.content.includes('t.me/rwans')).length;
+  if (statsEl) {
+    statsEl.innerHTML = '共 <strong>' + totalCount + '</strong> 条消息 | '
+      + '推广 <strong style="color:var(--accent)">' + promoCount + '</strong> | '
+      + '含链接 <strong style="color:var(--success)">' + linkCount + '</strong>';
+  }
+
+  if (!listEl) return;
+  if (messages.length === 0) {
+    listEl.innerHTML = '<div style="color:#555;text-align:center;padding:40px">该账号暂无发送记录</div>';
+    return;
+  }
+
+  let html = '';
+  messages.forEach(m => {
+    const isPromo = m.is_promo;
+    const hasLink = m.content && m.content.includes('t.me/rwans');
+    const borderColor = hasLink ? 'var(--success)' : (isPromo ? 'var(--accent)' : 'rgba(255,255,255,0.06)');
+    const time = m.sent_at ? new Date(m.sent_at) : null;
+    const timeStr = time ? (time.getMonth()+1) + '/' + time.getDate() + ' ' + String(time.getHours()).padStart(2,'0') + ':' + String(time.getMinutes()).padStart(2,'0') : '-';
+    const groupName = m.group_title || m.tg_group_id || '未知群';
+    const phone = m.phone || '-';
+
+    html += '<div style="'
+      + 'background:var(--card-bg);border-radius:8px;padding:12px 14px;'
+      + 'border-left:3px solid ' + borderColor + '">'
+
+      // Header: account + group + time
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      + '<div style="font-size:12px;color:var(--text-dim)">'
+      + '<span style="color:#fff;font-weight:700">#' + (m.account_id || '-') + '</span>'
+      + ' <span style="color:#555">' + escHtml(phone) + '</span>'
+      + ' → <span style="color:var(--success)">' + escHtml(groupName) + '</span>'
+      + (m.member_count ? ' <span style="color:#555">(' + m.member_count.toLocaleString() + '人)</span>' : '')
+      + '</div>'
+      + '<div style="font-size:11px;color:#555;white-space:nowrap">' + timeStr + '</div>'
+      + '</div>'
+
+      // Content
+      + '<div style="font-size:13px;line-height:1.6;color:#ddd;white-space:pre-wrap;word-break:break-word">'
+      + escHtml(m.content || '')
+      + '</div>'
+
+      // Tags
+      + '<div style="display:flex;gap:6px;margin-top:8px">';
+    if (isPromo) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(255,0,64,0.15);color:var(--accent)">推广</span>';
+    if (hasLink) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(0,255,136,0.15);color:var(--success)">含链接</span>';
+    if (!isPromo && !hasLink) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,0.05);color:#888">有机回复</span>';
+    html += '</div></div>';
+  });
+
+  listEl.innerHTML = html;
+}
+</script>
+</body>
+</html>

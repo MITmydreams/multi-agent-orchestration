@@ -1,0 +1,37 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Secrets & credentials
+.env
+.env.*
+!.env.example
+*.session
+*.session-journal
+tdlib_sessions/
+**/tdata/
+config/proxies.json
+config/seed_groups.txt
+
+# Runtime / ops data
+data/
+!data/.gitkeep
+*.log
+*.jsonl
+logs/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+.claude/
+
+# Local DB
+*.sqlite
+*.db

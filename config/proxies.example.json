@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "host": "127.0.0.1",
+    "port": 1080,
+    "username": "user",
+    "password": "pass",
+    "protocol": "socks5",
+    "country": "US",
+    "city": "example",
+    "role": "general",
+    "expires": null
+  }
+]
