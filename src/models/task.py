@@ -15,7 +15,7 @@ class AgentTask(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     agent_type: Mapped[str] = mapped_column(
         String(20), nullable=False,
-        comment="scout | infiltrator | content | viral",
+        comment="scout | executor | content | viral",
     )
     account_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("accounts.id", ondelete="SET NULL"), nullable=True, index=True,

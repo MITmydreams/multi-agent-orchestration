@@ -44,7 +44,7 @@ _CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 _BLACKLIST_HANDLES = frozenset({
     "share", "joinchat", "addstickers", "proxy", "socks",
     "setlanguage", "addtheme", "iv", "contact", "bot",
-    "rwans_the_button_bot", "game",
+    "example_bot", "game",
 })
 
 
@@ -215,7 +215,7 @@ async def discover_via_bio_links(
 ) -> list[dict[str, Any]]:
     """Extract t.me links from group descriptions (about) and pinned messages.
 
-    Many crypto groups recommend sister groups, partner communities, or
+    Many tech groups recommend sister groups, partner communities, or
     project-specific chats in their bio/about text and pinned messages.
     These are higher-signal than random message links because they
     represent deliberate community connections.
@@ -705,7 +705,7 @@ async def discover_via_web_sources(
     async def _search_telemetr(client: httpx.AsyncClient) -> list[dict]:
         """Scrape telemetr.io category pages."""
         results: list[dict] = []
-        categories = ["cryptocurrency", "games", "blockchain", "nft"]
+        categories = ["techcurrency", "games", "blockchain", "nft"]
 
         for cat in categories:
             for kind in ("groups", "channels"):

@@ -60,7 +60,7 @@ async def import_single_account(
     proxy_id: int,
     api_id: int,
     api_hash: str,
-    role: str = "infiltrator",
+    role: str = "executor",
 ) -> dict | None:
     """Import a single account from tdata directory.
 
@@ -108,7 +108,7 @@ async def import_single_account(
         # Use custom API to match our device fingerprint
         custom_api = API.TelegramDesktop.Generate(
             system="windows",
-            unique_id=f"promo_bot_{phone}"
+            unique_id=f"ops_orchestrator_{phone}"
         )
 
         session_path = SESSIONS_DIR / f"account_{proxy_id}"
@@ -216,7 +216,7 @@ async def batch_import(
     for idx, account_dir in enumerate(account_dirs):
         proxy_id = proxies[idx % len(proxies)]["id"] if proxies else 0
         role_map = roles or {}
-        role = role_map.get(idx + 1, "infiltrator")
+        role = role_map.get(idx + 1, "executor")
 
         result = await import_single_account(
             tdata_dir=account_dir,
@@ -260,7 +260,7 @@ async def main():
     group.add_argument("--tdata-dir", type=Path, help="Single account tdata directory")
     group.add_argument("--batch-dir", type=Path, help="Directory containing multiple account folders")
     parser.add_argument("--proxy-id", type=int, default=1, help="Proxy ID (for single import)")
-    parser.add_argument("--role", default="infiltrator", help="Account role: scout|infiltrator|content|backup")
+    parser.add_argument("--role", default="executor", help="Account role: scout|executor|content|backup")
     parser.add_argument("--api-id", type=int, default=0)
     parser.add_argument("--api-hash", default="")
     args = parser.parse_args()

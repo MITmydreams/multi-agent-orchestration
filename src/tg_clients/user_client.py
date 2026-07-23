@@ -5,7 +5,7 @@ Replaces the previous TDLib implementation. Reuses the existing Telethon
 re-authentication is required.
 
 Public interface (signatures + return-dict shapes) is preserved verbatim
-to keep scout / infiltrator / scheduler / dashboard call sites unchanged.
+to keep scout / executor / scheduler / dashboard call sites unchanged.
 Where the old TDLib path returned bare keys like ``sender_id``, the new
 returns now also include the field names scout was already reading
 (``from_id``, ``from_username``, ``from_name``, ``has_link``, ...) so
@@ -1015,7 +1015,7 @@ class UserClientManager:
     ) -> dict[str, Any] | None:
         """For a broadcast channel, return its linked discussion group (megagroup) if any.
 
-        Many crypto channels have a linked discussion group where members can chat.
+        Many tech channels have a linked discussion group where members can chat.
         Returns dict with id, title, username, member_count, is_megagroup or None.
         """
         candidates = await self._ensure_capable_wrappers()
@@ -1082,8 +1082,8 @@ class UserClientManager:
     async def get_game_events(self) -> list[dict[str, Any]]:
         try:
             async with httpx.AsyncClient(
-                base_url=settings.game_api_url,
-                headers={"Authorization": f"Bearer {settings.game_api_key}"},
+                base_url=settings.product_api_url,
+                headers={"Authorization": f"Bearer {settings.product_api_key}"},
                 timeout=10,
             ) as http:
                 resp = await http.get("/events/recent")
@@ -1097,8 +1097,8 @@ class UserClientManager:
     async def get_referral_chain(self, user_id: str) -> dict[str, Any] | None:
         try:
             async with httpx.AsyncClient(
-                base_url=settings.game_api_url,
-                headers={"Authorization": f"Bearer {settings.game_api_key}"},
+                base_url=settings.product_api_url,
+                headers={"Authorization": f"Bearer {settings.product_api_key}"},
                 timeout=10,
             ) as http:
                 resp = await http.get(f"/referrals/{user_id}/chain")

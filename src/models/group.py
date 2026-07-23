@@ -57,12 +57,12 @@ class GroupAccount(Base):
     )
     phase: Mapped[str] = mapped_column(
         String(20), nullable=False, default="lurking",
-        comment="lurking | trust_building | soft_promotion",
+        comment="lurking | trust_building | soft_outreach",
     )
     joined_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
     last_message_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     message_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    promo_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    outreach_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     def __repr__(self) -> str:
         return f"<GroupAccount group_id={self.group_id} account_id={self.account_id} phase={self.phase}>"

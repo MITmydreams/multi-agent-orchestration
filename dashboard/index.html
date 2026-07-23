@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THE BUTTON — 推广作战中心</title>
+<title>ATLAS — 触达作战中心</title>
 <style>
 /* ══════════════════════════════════════════
    SIDEBAR DASHBOARD — Pure CSS + JS
@@ -487,7 +487,7 @@ body {
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-dot"></div>
-    <span class="sidebar-logo-text">THE BUTTON</span>
+    <span class="sidebar-logo-text">ATLAS</span>
   </div>
 
   <div class="sidebar-nav">
@@ -501,7 +501,7 @@ body {
       <span class="nav-item-icon">💬</span><span class="nav-item-label">群组</span>
     </div>
     <div class="nav-item" id="nav-promo" onclick="switchPage('promo')">
-      <span class="nav-item-icon">📈</span><span class="nav-item-label">推广效果</span>
+      <span class="nav-item-icon">📈</span><span class="nav-item-label">触达效果</span>
     </div>
     <div class="nav-item" id="nav-activity" onclick="switchPage('activity')">
       <span class="nav-item-icon">📋</span><span class="nav-item-label">活动流</span>
@@ -543,8 +543,8 @@ body {
       <div class="kpi-card"><div class="kpi-card-num" id="kpi-discovered">--</div><div class="kpi-card-label">发现群</div></div>
       <div class="kpi-card"><div class="kpi-card-num" id="kpi-speakable">--</div><div class="kpi-card-label">可发言</div></div>
       <div class="kpi-card"><div class="kpi-card-num" id="kpi-joined">--</div><div class="kpi-card-label">已加入</div></div>
-      <div class="kpi-card"><div class="kpi-card-num" id="kpi-phase">--</div><div class="kpi-card-label">推广阶段</div></div>
-      <div class="kpi-card"><div class="kpi-card-num" id="kpi-today">--</div><div class="kpi-card-label">今日推广</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-phase">--</div><div class="kpi-card-label">触达阶段</div></div>
+      <div class="kpi-card"><div class="kpi-card-num" id="kpi-today">--</div><div class="kpi-card-label">今日触达</div></div>
       <div class="kpi-card"><div class="kpi-card-num" id="kpi-msg6h" style="color:var(--success)">--</div><div class="kpi-card-label">6h 消息</div></div>
     </div>
 
@@ -619,7 +619,7 @@ body {
 
   <!-- ══ PAGE: PROMO ══ -->
   <div class="page" id="page-promo">
-    <div class="page-title"><span class="page-title-icon">📈</span> 推广效果</div>
+    <div class="page-title"><span class="page-title-icon">📈</span> 触达效果</div>
 
     <div class="promo-section">
       <div class="section-title">消息成功率</div>
@@ -733,7 +733,7 @@ function flashNum(el) {
 }
 
 function formatAgo(sec) {
-  if (sec === undefined || sec === null) return '--';
+  if (sec === unsaasned || sec === null) return '--';
   if (sec < 60) return sec + '秒前';
   if (sec < 3600) return Math.floor(sec / 60) + '分钟前';
   if (sec < 86400) return Math.floor(sec / 3600) + '小时前';
@@ -800,7 +800,7 @@ function getScoreLabel(score) {
    ══════════════════════════════════════════ */
 function renderSidebarScore(kpi) {
   if (!kpi) return;
-  const score = Math.round(kpi.score !== undefined ? kpi.score : 0);
+  const score = Math.round(kpi.score !== unsaasned ? kpi.score : 0);
   const label = kpi.score_label || getScoreLabel(score);
   const color = getScoreColor(score);
   const deg = Math.round((score / 100) * 360);
@@ -825,7 +825,7 @@ function renderSidebarScore(kpi) {
   if (!dims) { detailsEl.innerHTML = ''; return; }
 
   const dimNames = {
-    coverage: '覆盖', penetration: '渗透', output: '产出', promo: '推广', growth: '增长',
+    coverage: '覆盖', penetration: '接入', output: '产出', promo: '触达', growth: '增长',
   };
   const dimIcons = {
     coverage: '🌐', penetration: '🎯', output: '📤', promo: '📢', growth: '📈',
@@ -872,7 +872,7 @@ function renderSidebarPulse(kpi) {
 
   // Show first pulse item + last update time
   const first = items[0];
-  const sec = first.seconds_ago !== undefined ? first.seconds_ago : 9999;
+  const sec = first.seconds_ago !== unsaasned ? first.seconds_ago : 9999;
   let dotCls = 'sidebar-pulse-dot ';
   if (sec < 300) dotCls += 'green';
   else if (sec < 1800) dotCls += 'yellow';
@@ -897,13 +897,13 @@ function renderOverview(kpi) {
     { id: 'kpi-speakable', val: f.groups_writable },
     { id: 'kpi-joined', val: f.groups_joined },
     { id: 'kpi-phase', val: f.accounts_in_promo },
-    { id: 'kpi-today', val: f.promo_messages_today },
+    { id: 'kpi-today', val: f.outreach_messages_today },
     { id: 'kpi-msg6h', val: (kpi.trends || {}).messages_6h },
   ];
   cards.forEach(c => {
     const el = $('#' + c.id);
     if (!el) return;
-    const val = c.val !== undefined ? c.val : '--';
+    const val = c.val !== unsaasned ? c.val : '--';
     const old = el.textContent;
     el.textContent = typeof val === 'number' ? val.toLocaleString() : val;
     if (old !== '--' && old !== String(val)) flashNum(el);
@@ -917,7 +917,7 @@ function renderOverview(kpi) {
     { label: 'Trust阶段', value: f.accounts_in_trust || 0 },
     { label: 'Promote阶段', value: f.accounts_in_promo || 0 },
     { label: '今日消息', value: f.messages_today || 0 },
-    { label: '今日推广', value: f.promo_messages_today || 0 },
+    { label: '今日触达', value: f.outreach_messages_today || 0 },
     { label: '链接分享', value: f.links_shared_today || 0 },
   ];
   renderFunnel(funnelItems);
@@ -1012,7 +1012,7 @@ function renderDeliveryRate(mf, funnel) {
     + '<summary style="cursor:pointer;color:#888;user-select:none">ℹ️ 投递率怎么算的？</summary>'
     + '<div style="margin-top:8px;padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;line-height:1.6">'
     + '<strong style="color:#ccc">投递率 = 成功发出的消息 ÷ 发言尝试次数</strong><br><br>'
-    + '发言尝试 = 系统进入 trust_building 或 soft_promotion 阶段并尝试发消息的次数<br><br>'
+    + '发言尝试 = 系统进入 trust_building 或 soft_outreach 阶段并尝试发消息的次数<br><br>'
     + '消息可能在以下环节丢失：<br>'
     + '&nbsp;&nbsp;1. <span style="color:#ff6b6b">读群消息失败</span> — FloodWait / entity 解析失败<br>'
     + '&nbsp;&nbsp;2. <span style="color:#ffa500">内容生成失败</span> — AI API 超时 / 模板兜底也失败<br>'
@@ -1037,7 +1037,7 @@ function renderFunnel(funnel) {
     const pct = maxVal > 0 ? (item.value / maxVal * 100) : 0;
     const pctStr = i === 0 ? '100%' : (maxVal > 0 ? (item.value / maxVal * 100).toFixed(1) + '%' : '0%');
     const prevKey = item.label;
-    const changed = prevFunnelNums[prevKey] !== undefined && prevFunnelNums[prevKey] !== item.value;
+    const changed = prevFunnelNums[prevKey] !== unsaasned && prevFunnelNums[prevKey] !== item.value;
     prevFunnelNums[prevKey] = item.value;
 
     html += '<div class="funnel-row">'
@@ -1159,15 +1159,15 @@ function renderTrends(trends) {
     if (!data || !p.el) return;
     const metrics = [
       { key: 'messages', icon: '💬', label: '消息' },
-      { key: 'promos', icon: '📢', label: '推广' },
+      { key: 'promos', icon: '📢', label: '触达' },
       { key: 'joins', icon: '➕', label: '加群' },
       { key: 'discovered', icon: '🔍', label: '发现' },
     ];
     let html = '';
     metrics.forEach(m => {
-      const v = data[m.key] !== undefined ? data[m.key] : '--';
+      const v = data[m.key] !== unsaasned ? data[m.key] : '--';
       const tKey = p.key + '_' + m.key;
-      const changed = prevTrendNums[tKey] !== undefined && prevTrendNums[tKey] !== v;
+      const changed = prevTrendNums[tKey] !== unsaasned && prevTrendNums[tKey] !== v;
       prevTrendNums[tKey] = v;
       html += '<div class="trend-item">'
         + '<div class="trend-num' + (changed ? ' num-flash' : '') + '">' + v + '</div>'
@@ -1220,7 +1220,7 @@ function renderAccounts(data) {
     + '<div class="account-phone" style="color:var(--text-dim);font-size:11px">手机号</div>'
     + '<div class="account-stat" style="font-size:11px">可发言群</div>'
     + '<div class="account-stat" style="font-size:11px">今日消息</div>'
-    + '<div class="account-stat" style="font-size:11px">今日推广</div>'
+    + '<div class="account-stat" style="font-size:11px">今日触达</div>'
     + '<div class="account-stat" style="font-size:11px">风险</div>'
     + '<div class="account-stat" style="font-size:11px;min-width:50px">状态</div>'
     + '<div class="account-expand-btn" style="visibility:hidden">▼</div>'
@@ -1235,7 +1235,7 @@ function renderAccounts(data) {
     const isIdle = speakable === 0;
     const isExpanded = expandedAccounts[a.id] || false;
     const msgs = a.messages_sent_today || 0;
-    const promo = a.promo_messages_today || 0;
+    const promo = a.outreach_messages_today || 0;
     const risk = (a.risk_score || 0).toFixed(2);
 
     html += '<div class="account-card' + (isExpanded ? ' expanded' : '') + '" data-acct-id="' + a.id + '">'
@@ -1275,8 +1275,8 @@ function renderAccounts(data) {
         speakableGrps.forEach(g => {
           const grade = g.grade || '-';
           const phase = g.phase || '-';
-          const phaseColor = {'潜水':'#666','闲聊':'var(--warn)','推广':'var(--success)'}[phase] || '#888';
-          const phaseIcon = {'潜水':'🤫','闲聊':'💬','推广':'📢'}[phase] || '❓';
+          const phaseColor = {'潜水':'#666','闲聊':'var(--warn)','触达':'var(--success)'}[phase] || '#888';
+          const phaseIcon = {'潜水':'🤫','闲聊':'💬','触达':'📢'}[phase] || '❓';
           html += '<tr>'
             + '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(g.title || g.tg_group_id || '') + '">' + escHtml(g.title || g.tg_group_id || '-') + '</td>'
             + '<td>' + (g.member_count || 0).toLocaleString() + '</td>'
@@ -1761,11 +1761,11 @@ async function refreshMsgView() {
 
   // Stats
   const totalCount = messages.length;
-  const promoCount = messages.filter(m => m.is_promo).length;
-  const linkCount = messages.filter(m => m.content && m.content.includes('t.me/rwans')).length;
+  const promoCount = messages.filter(m => m.is_outreach).length;
+  const linkCount = messages.filter(m => m.content && m.content.includes('t.me/ops')).length;
   if (statsEl) {
     statsEl.innerHTML = '共 <strong>' + totalCount + '</strong> 条消息 | '
-      + '推广 <strong style="color:var(--accent)">' + promoCount + '</strong> | '
+      + '触达 <strong style="color:var(--accent)">' + promoCount + '</strong> | '
       + '含链接 <strong style="color:var(--success)">' + linkCount + '</strong>';
   }
 
@@ -1777,8 +1777,8 @@ async function refreshMsgView() {
 
   let html = '';
   messages.forEach(m => {
-    const isPromo = m.is_promo;
-    const hasLink = m.content && m.content.includes('t.me/rwans');
+    const isPromo = m.is_outreach;
+    const hasLink = m.content && m.content.includes('t.me/ops');
     const borderColor = hasLink ? 'var(--success)' : (isPromo ? 'var(--accent)' : 'rgba(255,255,255,0.06)');
     const time = m.sent_at ? new Date(m.sent_at) : null;
     const timeStr = time ? (time.getMonth()+1) + '/' + time.getDate() + ' ' + String(time.getHours()).padStart(2,'0') + ':' + String(time.getMinutes()).padStart(2,'0') : '-';
@@ -1807,7 +1807,7 @@ async function refreshMsgView() {
 
       // Tags
       + '<div style="display:flex;gap:6px;margin-top:8px">';
-    if (isPromo) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(255,0,64,0.15);color:var(--accent)">推广</span>';
+    if (isPromo) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(255,0,64,0.15);color:var(--accent)">触达</span>';
     if (hasLink) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(0,255,136,0.15);color:var(--success)">含链接</span>';
     if (!isPromo && !hasLink) html += '<span style="font-size:10px;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,0.05);color:#888">有机回复</span>';
     html += '</div></div>';

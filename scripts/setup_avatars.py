@@ -25,7 +25,7 @@ from telethon import TelegramClient, functions, types
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-DB_URL = "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot"
+DB_URL = "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator"
 PROXIES_FILE = Path("config/proxies.json")
 AVATARS_DIR = Path("data/avatars")
 AVATARS_DIR.mkdir(parents=True, exist_ok=True)

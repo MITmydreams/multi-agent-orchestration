@@ -306,7 +306,7 @@ async def handle_accounts(request: web.Request) -> web.Response:
     sql = (
         "SELECT a.id, a.phone, a.status, a.account_age_days, "
         "COALESCE(ga_cnt.cnt, 0) AS groups_joined, "
-        "a.messages_sent_today, a.promo_messages_today, "
+        "a.messages_sent_today, a.outreach_messages_today, "
         "a.risk_score, a.proxy_id "
         "FROM accounts a "
         "LEFT JOIN ("
@@ -324,7 +324,7 @@ async def handle_accounts(request: web.Request) -> web.Response:
 
     columns = [
         "id", "phone", "status", "account_age_days", "groups_joined",
-        "messages_sent_today", "promo_messages_today", "risk_score", "proxy_id",
+        "messages_sent_today", "outreach_messages_today", "risk_score", "proxy_id",
     ]
     accounts = []
     for row in rows:
@@ -339,7 +339,7 @@ async def handle_accounts(request: web.Request) -> web.Response:
         "CASE "
         "  WHEN (NOW() - ga.joined_at) < INTERVAL '1 day' THEN '潜水' "
         "  WHEN (NOW() - ga.joined_at) < INTERVAL '3 days' THEN '闲聊' "
-        "  ELSE '推广' "
+        "  ELSE '触达' "
         "END AS phase "
         "FROM group_accounts ga "
         "JOIN groups g ON ga.group_id = g.id "
@@ -403,12 +403,12 @@ async def handle_activity(request: web.Request) -> web.Response:
 
 
 async def handle_promo_stats(request: web.Request) -> web.Response:
-    """GET /api/promo_stats -- promotion effectiveness statistics."""
+    """GET /api/promo_stats -- outreach effectiveness statistics."""
     try:
         async with async_session_factory() as session:
             total_sent = await _scalar(
                 session,
-                "SELECT COUNT(*) FROM message_logs WHERE is_promo = true",
+                "SELECT COUNT(*) FROM message_logs WHERE is_outreach = true",
             )
             total_link_replies = await _scalar(
                 session,
@@ -443,7 +443,7 @@ async def handle_promo_stats(request: web.Request) -> web.Response:
                 "SELECT g.tg_group_id, COUNT(*) AS cnt "
                 "FROM message_logs m "
                 "JOIN groups g ON g.id = m.group_id "
-                "WHERE m.is_promo = true "
+                "WHERE m.is_outreach = true "
                 "GROUP BY g.tg_group_id ORDER BY cnt DESC LIMIT 20"
             ))
             messages_by_group = [
@@ -453,7 +453,7 @@ async def handle_promo_stats(request: web.Request) -> web.Response:
             # Messages by account
             acct_rows = await session.execute(text(
                 "SELECT account_id, COUNT(*) AS cnt "
-                "FROM message_logs WHERE is_promo = true "
+                "FROM message_logs WHERE is_outreach = true "
                 "GROUP BY account_id ORDER BY cnt DESC"
             ))
             messages_by_account = [
@@ -498,13 +498,13 @@ async def handle_phase_distribution(request: web.Request) -> web.Response:
 
 
 async def handle_logs(request: web.Request) -> web.Response:
-    """GET /api/logs?lines=100 -- tail of promo-bot.jsonl log file."""
+    """GET /api/logs?lines=100 -- tail of ops-orchestrator.jsonl log file."""
     try:
         lines_requested = min(500, max(1, int(request.query.get("lines", "100"))))
     except ValueError:
         lines_requested = 100
 
-    log_path = Path(__file__).resolve().parent.parent / "data" / "logs" / "promo-bot.jsonl"
+    log_path = Path(__file__).resolve().parent.parent / "data" / "logs" / "ops-orchestrator.jsonl"
     if not log_path.exists():
         return web.json_response({"lines": [], "error": "Log file not found"})
 
@@ -559,7 +559,7 @@ async def handle_kpi(request: web.Request) -> web.Response:
                 "  CASE "
                 "    WHEN (NOW() - ga.joined_at) < INTERVAL '1 day' THEN 'lurking' "
                 "    WHEN (NOW() - ga.joined_at) < INTERVAL '3 days' THEN 'trust_building' "
-                "    ELSE 'soft_promotion' "
+                "    ELSE 'soft_outreach' "
                 "  END AS phase, "
                 "  COUNT(*) "
                 "FROM group_accounts ga "
@@ -572,17 +572,17 @@ async def handle_kpi(request: web.Request) -> web.Response:
                 phase_map[str(phase_name)] = int(cnt)
 
             accounts_in_trust = phase_map.get("trust_building", 0)
-            accounts_in_promo = phase_map.get("soft_promotion", 0)
+            accounts_in_promo = phase_map.get("soft_outreach", 0)
 
             messages_today = await _scalar(
                 session,
                 "SELECT COUNT(*) FROM message_logs "
                 "WHERE sent_at > NOW() - INTERVAL '24 hours'",
             )
-            promo_messages_today = await _scalar(
+            outreach_messages_today = await _scalar(
                 session,
                 "SELECT COUNT(*) FROM message_logs "
-                "WHERE is_promo = true AND sent_at > NOW() - INTERVAL '24 hours'",
+                "WHERE is_outreach = true AND sent_at > NOW() - INTERVAL '24 hours'",
             )
             links_shared_today = await _scalar(
                 session,
@@ -599,7 +599,7 @@ async def handle_kpi(request: web.Request) -> web.Response:
                 "WHERE task_type = 'infiltrate_task' "
                 "AND completed_at > NOW() - INTERVAL '24 hours' "
                 "AND (payload::text LIKE '%trust_building%' "
-                "     OR payload::text LIKE '%soft_promotion%')",
+                "     OR payload::text LIKE '%soft_outreach%')",
             )
 
             # Read-message failures: tasks where recent_messages fetch failed
@@ -700,7 +700,7 @@ async def handle_kpi(request: web.Request) -> web.Response:
         "accounts_in_trust": accounts_in_trust,
         "accounts_in_promo": accounts_in_promo,
         "messages_today": messages_today,
-        "promo_messages_today": promo_messages_today,
+        "outreach_messages_today": outreach_messages_today,
         "links_shared_today": links_shared_today,
     }
     trends = {
@@ -720,17 +720,17 @@ async def handle_kpi(request: web.Request) -> web.Response:
     # Output: messages_today >= groups_writable = 20 pts (1 msg/group/day)
     output = min(20, (funnel["messages_today"] / max(funnel["groups_writable"], 1)) * 20)
     # Promo: 20% of messages are promo = 20 pts
-    promo_ratio = funnel["promo_messages_today"] / max(funnel["messages_today"], 1)
-    promo_score = min(20, promo_ratio * 100)
+    outreach_ratio = funnel["outreach_messages_today"] / max(funnel["messages_today"], 1)
+    promo_score = min(20, outreach_ratio * 100)
     # Growth: 100 new (groups + joins) per day = 20 pts
     growth = min(20, (trends["new_groups_24h"] + trends["joins_24h"]) / 5)
     score = round(coverage + penetration + output + promo_score + growth)
 
     score_dimensions = {
         "coverage": {"score": round(coverage, 1), "max": 20, "rule": "可发言群 500 个满分", "current": funnel["groups_writable"]},
-        "penetration": {"score": round(penetration, 1), "max": 20, "rule": "渗透率 80% 满分", "current": f"{pen_ratio:.0%}"},
+        "penetration": {"score": round(penetration, 1), "max": 20, "rule": "接入率 80% 满分", "current": f"{pen_ratio:.0%}"},
         "output": {"score": round(output, 1), "max": 20, "rule": "每群每天 1 条消息满分", "current": funnel["messages_today"]},
-        "promo": {"score": round(promo_score, 1), "max": 20, "rule": "推广占比 20% 满分", "current": f"{promo_ratio:.0%}"},
+        "promo": {"score": round(promo_score, 1), "max": 20, "rule": "触达占比 20% 满分", "current": f"{outreach_ratio:.0%}"},
         "growth": {"score": round(growth, 1), "max": 20, "rule": "日增 100 (群+加入) 满分", "current": trends["new_groups_24h"] + trends["joins_24h"]},
     }
 
@@ -749,7 +749,7 @@ async def handle_kpi(request: web.Request) -> web.Response:
     gw = funnel["groups_writable"]
     gj = funnel["groups_joined"]
     mt = funnel["messages_today"]
-    pm = funnel["promo_messages_today"]
+    pm = funnel["outreach_messages_today"]
     ls = funnel["links_shared_today"]
 
     if gw < 10:
@@ -764,8 +764,8 @@ async def handle_kpi(request: web.Request) -> web.Response:
         bottleneck = {
             "id": "low_join_rate",
             "label": "加群速度不足",
-            "detail": f"{gw}个可发言群但仅加入{gj}个，渗透率{ratio_pct}%",
-            "suggestion": "检查infiltrator是否正常运行、账号加群是否被限制",
+            "detail": f"{gw}个可发言群但仅加入{gj}个，接入率{ratio_pct}%",
+            "suggestion": "检查executor是否正常运行、账号加群是否被限制",
         }
     elif phase_attempts > 0 and messages_sent_24h / phase_attempts < 0.1:
         delivery_pct = f"{messages_sent_24h / phase_attempts:.0%}"
@@ -786,17 +786,17 @@ async def handle_kpi(request: web.Request) -> web.Response:
     elif pm / max(mt, 1) < 0.1:
         promo_pct = round(pm / max(mt, 1) * 100)
         bottleneck = {
-            "id": "low_promo_ratio",
-            "label": "推广比例过低",
-            "detail": f"今日{mt}条消息中仅{pm}条推广，推广比{promo_pct}%",
-            "suggestion": "增加推广内容投放频率，确保soft_promotion阶段账号正常工作",
+            "id": "low_outreach_ratio",
+            "label": "触达比例过低",
+            "detail": f"今日{mt}条消息中仅{pm}条触达，触达比{promo_pct}%",
+            "suggestion": "增加触达内容投放频率，确保soft_outreach阶段账号正常工作",
         }
     elif ls == 0:
         bottleneck = {
             "id": "no_links_shared",
             "label": "链接未分享",
             "detail": "今日尚未分享任何链接",
-            "suggestion": "检查推广消息是否包含链接、链接生成逻辑是否正常",
+            "suggestion": "检查触达消息是否包含链接、链接生成逻辑是否正常",
         }
     else:
         bottleneck = {
@@ -859,7 +859,7 @@ async def handle_account_progress(request: web.Request) -> web.Response:
         "FROM accounts a "
         "LEFT JOIN ( "
         "  SELECT account_id, COUNT(*) AS cnt, "
-        "    COUNT(*) FILTER (WHERE is_promo) AS promo_cnt "
+        "    COUNT(*) FILTER (WHERE is_outreach) AS promo_cnt "
         "  FROM message_logs "
         "  WHERE sent_at > NOW() - INTERVAL '24 hours' "
         "  GROUP BY account_id "
@@ -927,7 +927,7 @@ async def handle_messages(request: web.Request) -> web.Response:
     sql = (
         f"SELECT m.id, m.account_id, a.phone, m.group_id, "
         f"g.tg_group_id, g.title AS group_title, g.member_count, "
-        f"m.content, m.is_promo, m.message_type, m.sent_at "
+        f"m.content, m.is_outreach, m.message_type, m.sent_at "
         f"FROM message_logs m "
         f"LEFT JOIN groups g ON m.group_id = g.id "
         f"LEFT JOIN accounts a ON m.account_id = a.id "
@@ -946,7 +946,7 @@ async def handle_messages(request: web.Request) -> web.Response:
     columns = [
         "id", "account_id", "phone", "group_id",
         "tg_group_id", "group_title", "member_count",
-        "content", "is_promo", "message_type", "sent_at",
+        "content", "is_outreach", "message_type", "sent_at",
     ]
     messages = []
     for row in rows:

@@ -25,7 +25,7 @@ const state = {
 
 // ----- 中文翻译映射 -----------------------------------------
 const ROLE_CN = {
-  infiltrator: '🕵️ 潜伏员',
+  executor: '🕵️ 观察期员',
   scout:       '🔍 侦察兵',
   content:     '📝 写手',
   backup:      '💤 替补',
@@ -74,7 +74,7 @@ function translateAction(action) {
     .replace(/scouted/i, '侦察了')
     .replace(/generated/i, '生成了')
     .replace(/reading/i, '阅读')
-    .replace(/lurking in/i, '潜伏于')
+    .replace(/lurking in/i, '观察期于')
     .replace(/idle/i, '待命中')
     .replace(/scouting/i, '侦察中');
 }
@@ -257,7 +257,7 @@ function renderAgentCard(a) {
       <div class="agent-expand">
         <div><span>状态</span><strong>${STATUS_CN[status] || status}</strong></div>
         <div><span>累计发言</span><strong>${a.total_messages ?? 0}</strong></div>
-        <div><span>今日推广</span><strong>${a.promo_today ?? 0}</strong></div>
+        <div><span>今日触达</span><strong>${a.promo_today ?? 0}</strong></div>
         <div><span>活跃群数</span><strong>${a.groups_today ?? 0}</strong></div>
         <div><span>被踢次数</span><strong>${a.kicked_count ?? 0}</strong></div>
         <div><span>号龄</span><strong>${a.age_days ?? 0}天</strong></div>
@@ -330,7 +330,7 @@ function renderGroups() {
   }
   const GROUP_STATUS_CN = {
     active:       '运营中',
-    infiltrating: '渗透中',
+    infiltrating: '接入中',
     evaluated:    '已评估',
     cooldown:     '冷却中',
     banned:       '已被封',

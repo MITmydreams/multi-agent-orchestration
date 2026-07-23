@@ -184,17 +184,17 @@ class RiskEngine:
         return min(score, 1.0)
 
     def _assess_content_risk(self, data: dict, policy: dict) -> float:
-        """Promotional ratio and link volume, thresholds driven by age-tier policy."""
+        """Outreachal ratio and link volume, thresholds driven by age-tier policy."""
         score = 0.0
 
         total = data.get("messages_sent_today", 0)
-        promo = data.get("promo_messages_today", 0)
-        promo_ratio = promo / total if total > 0 else 0.0
-        ratio_limit = policy.get("promo_ratio_limit", self._cfg.promo_ratio_limit)
+        promo = data.get("outreach_messages_today", 0)
+        outreach_ratio = promo / total if total > 0 else 0.0
+        ratio_limit = policy.get("outreach_ratio_limit", self._cfg.outreach_ratio_limit)
 
-        if promo_ratio > ratio_limit * 1.5:
+        if outreach_ratio > ratio_limit * 1.5:
             score += 0.25
-        elif promo_ratio > ratio_limit:
+        elif outreach_ratio > ratio_limit:
             score += 0.1
 
         links = data.get("links_sent_today", 0)
@@ -329,7 +329,7 @@ class RiskEngine:
             recs.append("Slow down group joins. Max 2 new groups per day recommended.")
 
         if factors.get("content", 0) >= 0.1:
-            recs.append("Promo ratio elevated -- increase organic/chat messages.")
+            recs.append("Outreach ratio elevated -- increase organic/chat messages.")
 
         if factors.get("report", 0) >= 0.25:
             recs.append("Account flagged or kicked multiple times. Consider hibernation.")

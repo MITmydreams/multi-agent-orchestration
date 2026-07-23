@@ -1,6 +1,6 @@
-"""Layer 2 -- Infiltrator Agent: trust-building and soft promotion.
+"""Layer 2 -- Executor Agent: trust-building and soft outreach.
 
-The infiltrator manages multiple accounts that blend into target groups
+The executor manages multiple accounts that blend into target groups
 using realistic personas.  It follows a strict three-phase lifecycle per
 account-group pair and enforces rigorous isolation rules between co-located
 accounts.
@@ -30,7 +30,7 @@ from src.brain.risk_engine import RiskEngine, RiskLevel
 from src.config import settings
 from src.models import Account, AgentTask, Group, GroupAccount, MessageLog, get_session
 from src.ai.template_engine import TemplateContentEngine
-from src.agents.infiltrator.coordinated_chat import CoordinatedChatStrategy
+from src.agents.executor.coordinated_chat import CoordinatedChatStrategy
 from src.tg_clients.user_client import UserClientManager
 
 logger = structlog.get_logger(__name__)
@@ -38,13 +38,13 @@ logger = structlog.get_logger(__name__)
 _PROMO_LOG = Path("data/logs/promo-tracking.jsonl")
 
 
-class InfiltratorAgent(BaseAgent):
-    """Core promotion layer -- infiltrates groups with realistic personas.
+class ExecutorAgent(BaseAgent):
+    """Core outreach layer -- infiltrates groups with realistic personas.
 
-    Three-phase infiltration lifecycle:
+    Three-phase engagement lifecycle:
         Phase 1 (Day 1-5):   Lurk -- only observe, occasionally react. Promo = 0%.
         Phase 2 (Day 6-14):  Trust -- participate in discussions, share useful info. Promo ~5%.
-        Phase 3 (Day 15+):   Soft Promotion -- natural sharing of game experiences. Promo 15-20%.
+        Phase 3 (Day 15+):   Soft Outreach -- natural sharing of game experiences. Promo 15-20%.
 
     Strict isolation rules:
         - Accounts in the same group NEVER interact with each other.
@@ -52,20 +52,20 @@ class InfiltratorAgent(BaseAgent):
         - Join intervals between accounts in the same group: 5-7 days minimum.
         - Same-group cooldown: 14 days after removal.
         - Max 5 messages per group per day per account.
-        - Promotional messages never exceed 20% of total messages.
+        - Outreachal messages never exceed 20% of total messages.
     """
 
-    name: str = "infiltrator"
-    agent_type: str = "infiltrator"
+    name: str = "executor"
+    agent_type: str = "executor"
 
     # Strict isolation rules
     RULES: dict[str, Any] = {
-        "同群渗透号之间绝不互动": True,
+        "同群接入号之间绝不互动": True,
         "不同时在线（错开1-2小时）": True,
         "入群时间间隔至少5-7天": True,
         "同群冷却期": 14,          # days
         "每日每群最多消息": 5,
-        "推广消息占比上限": 0.30,
+        "触达消息占比上限": 0.30,
     }
 
     # Phase durations (conservative to avoid Telegram restrictions)
@@ -78,11 +78,11 @@ class InfiltratorAgent(BaseAgent):
     LURK_DAYS_VETERAN: int = 1   # 1 day silent after joining
     TRUST_DAYS_VETERAN: int = 3  # day 2-3: organic chat, then promo
 
-    # Promotion approach types
+    # Outreach approach types
     PROMO_APPROACHES: list[str] = [
         "casual_mention",      # A: "Recently found an interesting project..."
         "experience_share",    # B: "Tried a button game the other day, free coins..."
-        "ask_for_help",        # C: "Anyone played The Button?"
+        "ask_for_help",        # C: "Anyone played Atlas?"
         "data_analysis",       # D: "Analysed a new project's dividend model..."
         "screenshot_share",    # E: Share win/dividend screenshot
     ]
@@ -130,7 +130,7 @@ class InfiltratorAgent(BaseAgent):
 
     async def run(self) -> None:
         """Main loop: check each account-group pair phase -> assign tasks -> execute."""
-        self._log.info("infiltrator.run.start")
+        self._log.info("executor.run.start")
         while self._running:
             if not await self.should_proceed():
                 await self._jittered_sleep(60)
@@ -138,7 +138,7 @@ class InfiltratorAgent(BaseAgent):
 
             try:
                 assignments = await self._load_active_assignments()
-                self._log.info("infiltrator.assignments_loaded", count=len(assignments))
+                self._log.info("executor.assignments_loaded", count=len(assignments))
 
                 for assignment in assignments:
                     if not self._running:
@@ -153,14 +153,14 @@ class InfiltratorAgent(BaseAgent):
                     if not account_data:
                         continue
                     if not await self.is_account_safe(account_data):
-                        self._log.warning("infiltrator.account_unsafe", account_id=account_id)
+                        self._log.warning("executor.account_unsafe", account_id=account_id)
                         continue
 
                     # Check isolation: skip if another account from this agent
                     # is currently active in the same group
                     if await self._is_peer_active(account_id, group_id):
                         self._log.debug(
-                            "infiltrator.peer_active_skip",
+                            "executor.peer_active_skip",
                             account_id=account_id,
                             group_id=group_id,
                         )
@@ -173,8 +173,8 @@ class InfiltratorAgent(BaseAgent):
                         await self.execute_lurk_phase(account_id, tg_group_id)
                     elif phase == "trust_building":
                         await self.execute_trust_phase(account_id, tg_group_id)
-                    elif phase == "soft_promotion":
-                        await self.execute_promotion_phase(account_id, tg_group_id)
+                    elif phase == "soft_outreach":
+                        await self.execute_outreach_phase(account_id, tg_group_id)
 
                     await self.log_activity("infiltrate", {
                         "account_id": account_id,
@@ -186,7 +186,7 @@ class InfiltratorAgent(BaseAgent):
                     await self._jittered_sleep(random.uniform(300, 600))  # 5-10 min between msgs in same cycle
 
             except Exception:
-                self._log.exception("infiltrator.run.cycle_error")
+                self._log.exception("executor.run.cycle_error")
 
             # Main cycle interval (3-5 min for testing)
             await self._jittered_sleep(random.uniform(180, 300))
@@ -203,7 +203,7 @@ class InfiltratorAgent(BaseAgent):
         - Occasionally send a non-promo reaction/emoji (10% chance)
         - Occasionally reply to a popular message with a short organic comment (5% chance)
         """
-        self._log.info("infiltrator.lurk", account_id=account_id, group_id=group_id)
+        self._log.info("executor.lurk", account_id=account_id, group_id=group_id)
 
         if not await self._daily_message_budget_ok(account_id, group_id):
             return
@@ -221,15 +221,15 @@ class InfiltratorAgent(BaseAgent):
 
             if not recent_messages:
                 # No context available -- use template directly, skip AI call
-                response = self._template_fallback(account_id, group_id, is_promo=False)
+                response = self._template_fallback(account_id, group_id, is_outreach=False)
             else:
                 response = await self.generate_contextual_response(
                     account_id, group_id, recent_messages,
                 )
                 if not response:
-                    response = self._template_fallback(account_id, group_id, is_promo=False)
+                    response = self._template_fallback(account_id, group_id, is_outreach=False)
             if response:
-                await self._send_message(account_id, group_id, response, is_promo=False)
+                await self._send_message(account_id, group_id, response, is_outreach=False)
         elif roll < 0.45 and recent_messages:
             # React with emoji
             reactions = ["👍", "😂", "🔥", "👀", "💯"]
@@ -241,14 +241,14 @@ class InfiltratorAgent(BaseAgent):
                         account_id, group_id, msg_id, random.choice(reactions),
                     )
                 except Exception:
-                    self._log.debug("infiltrator.lurk.react_failed", account_id=account_id)
+                    self._log.debug("executor.lurk.react_failed", account_id=account_id)
 
     async def execute_trust_phase(self, account_id: int, group_id: str) -> None:
         """Phase 2: Trust building -- participate in discussions, share useful info.
 
-        Promotional content: ~5% of messages.
+        Outreachal content: ~5% of messages.
         """
-        self._log.info("infiltrator.trust", account_id=account_id, group_id=group_id)
+        self._log.info("executor.trust", account_id=account_id, group_id=group_id)
 
         if not await self._daily_message_budget_ok(account_id, group_id):
             return
@@ -261,25 +261,25 @@ class InfiltratorAgent(BaseAgent):
             return  # Already replied with link, done for this tick
 
         # Decide: organic response (75%) or soft mention (25%)
-        is_promo = random.random() < 0.25
-        if is_promo and not await self._promo_ratio_ok(account_id):
-            is_promo = False
+        is_outreach = random.random() < 0.25
+        if is_outreach and not await self._outreach_ratio_ok(account_id):
+            is_outreach = False
 
         if not recent_messages:
             # No context available -- use template directly, skip AI call
-            response = self._template_fallback(account_id, group_id, is_promo=is_promo)
+            response = self._template_fallback(account_id, group_id, is_outreach=is_outreach)
         else:
             response = await self.generate_contextual_response(
                 account_id, group_id, recent_messages,
             )
             if not response:
                 # AI failed -> fall back to pre-written templates, never leave empty-handed
-                response = self._template_fallback(account_id, group_id, is_promo=is_promo)
+                response = self._template_fallback(account_id, group_id, is_outreach=is_outreach)
         if not response:
-            self._log.warning("infiltrator.trust.no_content", account_id=account_id, group_id=group_id)
+            self._log.warning("executor.trust.no_content", account_id=account_id, group_id=group_id)
             return
 
-        if is_promo:
+        if is_outreach:
             # Inject a subtle mention into an otherwise organic message
             response = await self._soften_promo(response, account_id)
 
@@ -287,19 +287,19 @@ class InfiltratorAgent(BaseAgent):
         spam_score = await self.anti_spam.check(response)
         if spam_score > 0.6:
             self._log.warning(
-                "infiltrator.trust.spam_blocked",
+                "executor.trust.spam_blocked",
                 account_id=account_id,
                 spam_score=spam_score,
             )
             return
 
-        ok = await self._send_message(account_id, group_id, response, is_promo=is_promo)
+        ok = await self._send_message(account_id, group_id, response, is_outreach=is_outreach)
         if ok:
             await self._log_promo_event(
                 "trust_message",
                 account_id=account_id,
                 group_id=group_id,
-                is_promo=is_promo,
+                is_outreach=is_outreach,
                 content_len=len(response),
             )
         else:
@@ -310,21 +310,21 @@ class InfiltratorAgent(BaseAgent):
                 phase="trust_building",
             )
 
-    async def execute_promotion_phase(self, account_id: int, group_id: str) -> None:
-        """Phase 3: Soft promotion -- natural sharing of game experiences.
+    async def execute_outreach_phase(self, account_id: int, group_id: str) -> None:
+        """Phase 3: Soft outreach -- natural sharing of game experiences.
 
-        Promotional content: 15-20% of messages.
+        Outreachal content: 15-20% of messages.
 
-        Five promotion approaches (randomly selected):
+        Five outreach approaches (randomly selected):
         A. Casual mention: "Recently found an interesting project..."
         B. Experience share: "Tried a button game the other day, coin room is free..."
-        C. Ask for help: "Anyone played The Button?"
+        C. Ask for help: "Anyone played Atlas?"
         D. Data analysis: "Analysed a new project's dividend model..."
         E. Screenshot share: Share win/dividend screenshot
 
         KEY RULE: NEVER proactively send links. Wait for someone to ask.
         """
-        self._log.info("infiltrator.promote", account_id=account_id, group_id=group_id)
+        self._log.info("executor.promote", account_id=account_id, group_id=group_id)
 
         if not await self._daily_message_budget_ok(account_id, group_id):
             return
@@ -338,16 +338,16 @@ class InfiltratorAgent(BaseAgent):
 
         # Decide: organic (80-85%) or promo (15-20%)
         promo_chance = random.uniform(0.30, 0.35)
-        is_promo = random.random() < promo_chance
-        if is_promo and not await self._promo_ratio_ok(account_id):
-            is_promo = False
+        is_outreach = random.random() < promo_chance
+        if is_outreach and not await self._outreach_ratio_ok(account_id):
+            is_outreach = False
 
-        if is_promo:
+        if is_outreach:
             approach = random.choice(self.PROMO_APPROACHES)
-            response = await self._generate_promo_message(account_id, group_id, approach)
+            response = await self._generate_outreach_message(account_id, group_id, approach)
         elif not recent_messages:
             # No context available -- use template directly, skip AI call
-            response = self._template_fallback(account_id, group_id, is_promo=False)
+            response = self._template_fallback(account_id, group_id, is_outreach=False)
         else:
             response = await self.generate_contextual_response(
                 account_id, group_id, recent_messages,
@@ -355,17 +355,17 @@ class InfiltratorAgent(BaseAgent):
 
         if not response:
             # AI failed -> fall back to pre-written templates, never leave empty-handed
-            response = self._template_fallback(account_id, group_id, is_promo=is_promo)
+            response = self._template_fallback(account_id, group_id, is_outreach=is_outreach)
         if not response:
-            self._log.warning("infiltrator.promote.no_content", account_id=account_id, group_id=group_id)
+            self._log.warning("executor.promote.no_content", account_id=account_id, group_id=group_id)
             return
 
-        # If promo message lacks a game link, append one 50% of the time
-        if is_promo and settings.game_miniapp_url not in response and random.random() < 0.50:
+        # If outreach message lacks a game link, append one 50% of the time
+        if is_outreach and settings.product_app_url not in response and random.random() < 0.50:
             link_suffixes = [
-                f"\n{settings.game_miniapp_url}",
-                f" 👆 {settings.game_miniapp_url}",
-                f"\ncheck it out: {settings.game_miniapp_url}",
+                f"\n{settings.product_app_url}",
+                f" 👆 {settings.product_app_url}",
+                f"\ncheck it out: {settings.product_app_url}",
             ]
             response += random.choice(link_suffixes)
 
@@ -373,35 +373,35 @@ class InfiltratorAgent(BaseAgent):
         spam_score = await self.anti_spam.check(response)
         if spam_score > 0.5:
             self._log.warning(
-                "infiltrator.promote.spam_blocked",
+                "executor.promote.spam_blocked",
                 account_id=account_id,
                 spam_score=spam_score,
             )
             return
 
-        ok = await self._send_message(account_id, group_id, response, is_promo=is_promo)
+        ok = await self._send_message(account_id, group_id, response, is_outreach=is_outreach)
         if ok:
             await self._log_promo_event(
                 "promo_message",
                 account_id=account_id,
                 group_id=group_id,
-                approach=approach if is_promo else "organic",
+                approach=approach if is_outreach else "organic",
                 content_len=len(response),
-                has_link=settings.game_miniapp_url in response if response else False,
+                has_link=settings.product_app_url in response if response else False,
             )
         else:
             await self._log_promo_event(
                 "send_failed",
                 account_id=account_id,
                 group_id=group_id,
-                phase="soft_promotion",
+                phase="soft_outreach",
             )
 
     # ------------------------------------------------------------------
     # Template fallback -- ensures every phase always has content to send
     # ------------------------------------------------------------------
 
-    def _template_fallback(self, account_id: int, group_id: str, *, is_promo: bool) -> str | None:
+    def _template_fallback(self, account_id: int, group_id: str, *, is_outreach: bool) -> str | None:
         """Fall back to pre-written templates when AI content gen fails.
 
         This ensures we ALWAYS have something to send, hitting the daily
@@ -415,15 +415,15 @@ class InfiltratorAgent(BaseAgent):
             gid_lower = group_id.lower() if group_id else ""
             if any(kw in gid_lower for kw in ["game", "play", "earn", "tap", "click"]):
                 context = "asking_recommendation"  # game-related
-            elif any(kw in gid_lower for kw in ["ton", "wallet", "defi", "swap"]):
+            elif any(kw in gid_lower for kw in ["ton", "wallet", "saas", "swap"]):
                 context = "responding_to_question"  # tech discussion
             else:
                 context = "general"
 
-            if is_promo:
+            if is_outreach:
                 # Use promo template (may contain link)
-                return self._template_engine.generate_promo_with_link(
-                    "crypto_veteran",
+                return self._template_engine.generate_outreach_with_link(
+                    "tech_veteran",
                     random.choice([
                         "casual_mention", "experience_share", "ask_for_help",
                         "data_analysis", "screenshot_share",
@@ -433,13 +433,13 @@ class InfiltratorAgent(BaseAgent):
             else:
                 # Use contextual chat template
                 return self._template_engine.generate_chat_response(
-                    "crypto_veteran",
+                    "tech_veteran",
                     context,
                     language="en",
                 )
         except Exception:
             self._log.warning(
-                "infiltrator.template_fallback.error",
+                "executor.template_fallback.error",
                 account_id=account_id,
                 group_id=group_id,
             )
@@ -467,7 +467,7 @@ class InfiltratorAgent(BaseAgent):
         group_id = task.get("group_id")
 
         if account_id is None or group_id is None:
-            self._log.warning("infiltrator.execute_task.missing_ids", task=task)
+            self._log.warning("executor.execute_task.missing_ids", task=task)
             return
 
         # Branch: join_group task is handled separately with its own safety
@@ -482,7 +482,7 @@ class InfiltratorAgent(BaseAgent):
         if not account_data:
             return
         if not await self.is_account_safe(account_data):
-            self._log.warning("infiltrator.execute_task.account_unsafe", account_id=account_id)
+            self._log.warning("executor.execute_task.account_unsafe", account_id=account_id)
             return
 
         # Resolve tg_group_id from DB group id.
@@ -514,7 +514,7 @@ class InfiltratorAgent(BaseAgent):
 
         if member_count > 0 and member_count < 10 and random.random() < 0.5:
             self._log.debug(
-                "infiltrator.execute_task.small_group_skip",
+                "executor.execute_task.small_group_skip",
                 account_id=account_id,
                 group_id=group_id,
                 member_count=member_count,
@@ -524,8 +524,8 @@ class InfiltratorAgent(BaseAgent):
         phase = await self.determine_phase(account_id, tg_group_id)
 
         # Coordinated dual-account chat: 20% chance during trust_building
-        # or soft_promotion phases (replaces the normal single-account msg).
-        if phase in ("trust_building", "soft_promotion"):
+        # or soft_outreach phases (replaces the normal single-account msg).
+        if phase in ("trust_building", "soft_outreach"):
             if (
                 settings.coordinated_chat_enabled
                 and random.random() < settings.coordinated_chat_chance
@@ -553,8 +553,8 @@ class InfiltratorAgent(BaseAgent):
             await self.execute_lurk_phase(account_id, tg_group_id)
         elif phase == "trust_building":
             await self.execute_trust_phase(account_id, tg_group_id)
-        elif phase == "soft_promotion":
-            await self.execute_promotion_phase(account_id, tg_group_id)
+        elif phase == "soft_outreach":
+            await self.execute_outreach_phase(account_id, tg_group_id)
 
         await self.log_activity("infiltrate_task", {
             "account_id": account_id,
@@ -587,12 +587,12 @@ class InfiltratorAgent(BaseAgent):
             return False
         if not await self.is_account_safe(account_data):
             self._log.warning(
-                "infiltrator.join_group.account_unsafe", account_id=account_id,
+                "executor.join_group.account_unsafe", account_id=account_id,
             )
             return False
         if not await self._check_join_quota(account_id):
             self._log.info(
-                "infiltrator.join_group.quota_blocked", account_id=account_id,
+                "executor.join_group.quota_blocked", account_id=account_id,
             )
             return False
 
@@ -606,7 +606,7 @@ class InfiltratorAgent(BaseAgent):
                 group = result.scalar_one_or_none()
                 if group is None:
                     self._log.warning(
-                        "infiltrator.join_group.group_missing",
+                        "executor.join_group.group_missing",
                         group_id=db_group_id,
                     )
                     return False
@@ -619,7 +619,7 @@ class InfiltratorAgent(BaseAgent):
                 group_title = group.title
         except Exception:
             self._log.exception(
-                "infiltrator.join_group.load_error",
+                "executor.join_group.load_error",
                 account_id=account_id,
                 group_id=db_group_id,
             )
@@ -627,7 +627,7 @@ class InfiltratorAgent(BaseAgent):
 
         if not target:
             self._log.warning(
-                "infiltrator.join_group.no_target",
+                "executor.join_group.no_target",
                 account_id=account_id,
                 group_id=db_group_id,
             )
@@ -638,7 +638,7 @@ class InfiltratorAgent(BaseAgent):
             ok = await self.user_client.join_group(account_id, target)
         except Exception:
             self._log.exception(
-                "infiltrator.join_group.client_error",
+                "executor.join_group.client_error",
                 account_id=account_id,
                 group_id=db_group_id,
             )
@@ -667,7 +667,7 @@ class InfiltratorAgent(BaseAgent):
                             .values(status="readonly")
                         )
                         self._log.info(
-                            "infiltrator.join_group.auto_readonly",
+                            "executor.join_group.auto_readonly",
                             group_id=db_group_id,
                             fail_count=fail_count,
                         )
@@ -700,7 +700,7 @@ class InfiltratorAgent(BaseAgent):
                     ga.joined_at = now
         except Exception:
             self._log.exception(
-                "infiltrator.join_group.upsert_error",
+                "executor.join_group.upsert_error",
                 account_id=account_id,
                 group_id=db_group_id,
             )
@@ -767,7 +767,7 @@ class InfiltratorAgent(BaseAgent):
 
                 if joins_today >= cap:
                     self._log.debug(
-                        "infiltrator.join_quota.daily_cap_hit",
+                        "executor.join_quota.daily_cap_hit",
                         account_id=account_id,
                         tier=tier,
                         cap=cap,
@@ -785,7 +785,7 @@ class InfiltratorAgent(BaseAgent):
                 if last_joined_at is not None:
                     if datetime.utcnow() - last_joined_at < timedelta(minutes=5):
                         self._log.debug(
-                            "infiltrator.join_quota.interval_block",
+                            "executor.join_quota.interval_block",
                             account_id=account_id,
                             last_joined_at=str(last_joined_at),
                         )
@@ -794,7 +794,7 @@ class InfiltratorAgent(BaseAgent):
                 return True
         except Exception:
             self._log.exception(
-                "infiltrator.join_quota.error", account_id=account_id,
+                "executor.join_quota.error", account_id=account_id,
             )
             return False
 
@@ -803,13 +803,13 @@ class InfiltratorAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def determine_phase(self, account_id: int, group_id: str) -> str:
-        """Determine the current infiltration phase based on join date and history.
+        """Determine the current engagement phase based on join date and history.
 
         *group_id* may be a tg_group_id (``"@toncontests"`` or
         ``"2431210312"``) or an internal DB ``Group.id`` string.  We
         resolve it to the DB id before querying ``GroupAccount``.
 
-        Returns one of: ``"lurking"``, ``"trust_building"``, ``"soft_promotion"``.
+        Returns one of: ``"lurking"``, ``"trust_building"``, ``"soft_outreach"``.
         """
         try:
             async with get_session() as session:
@@ -867,7 +867,7 @@ class InfiltratorAgent(BaseAgent):
                 elif days_since_join < trust_days:
                     phase = "trust_building"
                 else:
-                    phase = "soft_promotion"
+                    phase = "soft_outreach"
 
                 if phase != "lurking":
                     await self._log_promo_event(
@@ -879,7 +879,7 @@ class InfiltratorAgent(BaseAgent):
                     )
                 return phase
         except Exception:
-            self._log.exception("infiltrator.determine_phase.error", account_id=account_id)
+            self._log.exception("executor.determine_phase.error", account_id=account_id)
             return "lurking"
 
     async def _get_account_age(self, account_id: int) -> int:
@@ -893,7 +893,7 @@ class InfiltratorAgent(BaseAgent):
                 age = result.scalar_one_or_none()
                 age = int(age) if age is not None else 0
         except Exception:
-            self._log.exception("infiltrator.get_account_age.error", account_id=account_id)
+            self._log.exception("executor.get_account_age.error", account_id=account_id)
             age = 0
         self._account_age_cache[account_id] = age
         return age
@@ -958,7 +958,7 @@ class InfiltratorAgent(BaseAgent):
 
             # Either: (a) reply to our message, or (b) keyword matched
             # in the recent conversation window -- respond with link.
-            game_link = settings.game_miniapp_url
+            game_link = settings.product_app_url
 
             replies_pool = [
                 f"在这里 {game_link} 金币房免费先试试",
@@ -987,7 +987,7 @@ class InfiltratorAgent(BaseAgent):
                         to_keep = list(self._replied_link_messages)[-500:]
                         self._replied_link_messages = set(to_keep)
                 self._log.info(
-                    "infiltrator.link_reply_sent",
+                    "executor.link_reply_sent",
                     account_id=account_id,
                     group_id=group_id,
                     trigger_text=text[:50],
@@ -1029,34 +1029,34 @@ class InfiltratorAgent(BaseAgent):
             response = await self.content_gen.generate_response(
                 persona=persona,
                 group_context=context,
-                is_promo=False,
+                is_outreach=False,
             )
             return response
         except Exception:
-            self._log.exception("infiltrator.generate_response.error", account_id=account_id)
+            self._log.exception("executor.generate_response.error", account_id=account_id)
             return None
 
-    async def _generate_promo_message(
+    async def _generate_outreach_message(
         self, account_id: int, group_id: str, approach: str,
     ) -> str | None:
-        """Generate a soft promotional message using the specified approach."""
+        """Generate a soft outreach message using the specified approach."""
         try:
             persona = await self._get_account_persona(account_id)
             if persona is None:
                 return None
 
-            response = await self.content_gen.generate_promo(
+            response = await self.content_gen.generate_outreach(
                 persona=persona,
                 approach=approach,
                 group_id=group_id,
             )
             return response
         except Exception:
-            self._log.exception("infiltrator.generate_promo.error", account_id=account_id)
+            self._log.exception("executor.generate_outreach.error", account_id=account_id)
             return None
 
     async def _soften_promo(self, message: str, account_id: int) -> str:
-        """Ensure a promotional message sounds natural, not salesy."""
+        """Ensure a outreach message sounds natural, not salesy."""
         try:
             persona = await self._get_account_persona(account_id)
             if persona is None:
@@ -1074,7 +1074,7 @@ class InfiltratorAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def _is_peer_active(self, account_id: int, group_id: int) -> bool:
-        """Check if another infiltrator account was active in this group recently.
+        """Check if another executor account was active in this group recently.
 
         Accounts must be staggered by 1-2 hours.
         """
@@ -1119,7 +1119,7 @@ class InfiltratorAgent(BaseAgent):
                 group_messages = [m for m in today_messages if str(m.group_id) == str(group_id)]
                 if len(group_messages) >= self.RULES["每日每群最多消息"]:
                     self._log.debug(
-                        "infiltrator.daily_budget_exceeded",
+                        "executor.daily_budget_exceeded",
                         account_id=account_id,
                         group_id=group_id,
                         count=len(group_messages),
@@ -1129,8 +1129,8 @@ class InfiltratorAgent(BaseAgent):
         except Exception:
             return False
 
-    async def _promo_ratio_ok(self, account_id: int) -> bool:
-        """Check that promotional messages don't exceed the ratio limit."""
+    async def _outreach_ratio_ok(self, account_id: int) -> bool:
+        """Check that outreach messages don't exceed the ratio limit."""
         try:
             cutoff = datetime.utcnow() - timedelta(days=7)
             async with get_session() as session:
@@ -1149,9 +1149,9 @@ class InfiltratorAgent(BaseAgent):
                 if not recent:
                     return True
 
-                promo_count = sum(1 for m in recent if m.is_promo)
-                ratio = promo_count / len(recent)
-                return ratio < self.RULES["推广消息占比上限"]
+                outreach_count = sum(1 for m in recent if m.is_outreach)
+                ratio = outreach_count / len(recent)
+                return ratio < self.RULES["触达消息占比上限"]
         except Exception:
             return False
 
@@ -1160,7 +1160,7 @@ class InfiltratorAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def _send_message(
-        self, account_id: int, group_id: str, content: str, *, is_promo: bool,
+        self, account_id: int, group_id: str, content: str, *, is_outreach: bool,
     ) -> bool:
         """Send a message and log it."""
         try:
@@ -1198,8 +1198,8 @@ class InfiltratorAgent(BaseAgent):
                     group_id=db_group_id,
                     content=content,
                     content_hash=content_hash,
-                    is_promo=is_promo,
-                    message_type="promo" if is_promo else "chat",
+                    is_outreach=is_outreach,
+                    message_type="promo" if is_outreach else "chat",
                 )
                 session.add(log_entry)
 
@@ -1207,20 +1207,20 @@ class InfiltratorAgent(BaseAgent):
                 acct = await session.get(Account, account_id)
                 if acct is not None:
                     acct.messages_sent_today = (acct.messages_sent_today or 0) + 1
-                    if is_promo:
-                        acct.promo_messages_today = (acct.promo_messages_today or 0) + 1
+                    if is_outreach:
+                        acct.outreach_messages_today = (acct.outreach_messages_today or 0) + 1
                     await session.commit()
 
             self._log.info(
-                "infiltrator.message_sent",
+                "executor.message_sent",
                 account_id=account_id,
                 group_id=group_id,
-                is_promo=is_promo,
+                is_outreach=is_outreach,
                 content_len=len(content),
             )
             return True
         except Exception:
-            self._log.exception("infiltrator.send_message.error", account_id=account_id)
+            self._log.exception("executor.send_message.error", account_id=account_id)
             return False
 
     # ------------------------------------------------------------------
@@ -1228,14 +1228,14 @@ class InfiltratorAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def _load_active_assignments(self) -> list[dict]:
-        """Load all active account-group assignments for infiltration."""
+        """Load all active account-group assignments for engagement."""
         try:
             async with get_session() as session:
                 stmt = (
                     select(GroupAccount, Group, Account)
                     .join(Group, GroupAccount.group_id == Group.id)
                     .join(Account, GroupAccount.account_id == Account.id)
-                    .where(Account.role == "infiltrator")
+                    .where(Account.role == "executor")
                     .where(Account.status == "active")
                     .where(Group.status.in_(["evaluated", "infiltrating", "active"]))
                 )
@@ -1257,7 +1257,7 @@ class InfiltratorAgent(BaseAgent):
                     })
                 return assignments
         except Exception:
-            self._log.exception("infiltrator.load_assignments.error")
+            self._log.exception("executor.load_assignments.error")
             return []
 
     async def _load_account_data(self, account_id: int) -> dict | None:
@@ -1274,7 +1274,7 @@ class InfiltratorAgent(BaseAgent):
                     "messages_sent_today": account.messages_sent_today,
                     "groups_active_today": account.groups_active_today,
                     "new_groups_today": account.new_groups_today,
-                    "promo_messages_today": account.promo_messages_today,
+                    "outreach_messages_today": account.outreach_messages_today,
                     "dms_initiated_today": account.dms_initiated_today,
                     "links_sent_today": account.links_sent_today,
                     "reported": account.reported,
@@ -1283,7 +1283,7 @@ class InfiltratorAgent(BaseAgent):
                     "phone_provider": account.phone_provider,
                 }
         except Exception:
-            self._log.exception("infiltrator.load_account.error", account_id=account_id)
+            self._log.exception("executor.load_account.error", account_id=account_id)
             return None
 
     async def _get_account_persona(self, account_id: int) -> PersonaTemplate | None:
@@ -1297,7 +1297,7 @@ class InfiltratorAgent(BaseAgent):
                     return None
                 return self.persona_manager.get_persona(persona_id)
         except Exception:
-            self._log.exception("infiltrator.get_persona.error", account_id=account_id)
+            self._log.exception("executor.get_persona.error", account_id=account_id)
             return None
 
     # ------------------------------------------------------------------

@@ -16,12 +16,12 @@ class AgePolicy:
         "veteran": {  # 365+ days
             "nurture_days": 3,
             "first_message_day": 2,
-            "start_infiltration_day": 5,
+            "start_engagement_day": 5,
             "max_messages_per_day": 40,
             "max_groups_per_day": 8,
             "max_new_groups_per_day": 8,
             "max_dms_per_day": 5,
-            "promo_ratio_limit": 0.20,
+            "outreach_ratio_limit": 0.20,
             "max_links_per_day": 3,
             "report_tolerance": 3,
             "hibernate_hours": 48,
@@ -31,12 +31,12 @@ class AgePolicy:
         "mature": {  # 180-364 days
             "nurture_days": 7,
             "first_message_day": 4,
-            "start_infiltration_day": 8,
+            "start_engagement_day": 8,
             "max_messages_per_day": 30,
             "max_groups_per_day": 5,
             "max_new_groups_per_day": 3,
             "max_dms_per_day": 3,
-            "promo_ratio_limit": 0.15,
+            "outreach_ratio_limit": 0.15,
             "max_links_per_day": 2,
             "report_tolerance": 2,
             "hibernate_hours": 72,
@@ -46,12 +46,12 @@ class AgePolicy:
         "young": {  # 90-179 days
             "nurture_days": 14,
             "first_message_day": 8,
-            "start_infiltration_day": 15,
+            "start_engagement_day": 15,
             "max_messages_per_day": 20,
             "max_groups_per_day": 3,
             "max_new_groups_per_day": 2,
             "max_dms_per_day": 2,
-            "promo_ratio_limit": 0.10,
+            "outreach_ratio_limit": 0.10,
             "max_links_per_day": 1,
             "report_tolerance": 1,
             "hibernate_hours": 168,  # 1 week
@@ -61,12 +61,12 @@ class AgePolicy:
         "fresh": {  # <90 days
             "nurture_days": 45,
             "first_message_day": 14,
-            "start_infiltration_day": 30,
+            "start_engagement_day": 30,
             "max_messages_per_day": 10,
             "max_groups_per_day": 2,
             "max_new_groups_per_day": 1,
             "max_dms_per_day": 1,
-            "promo_ratio_limit": 0.05,
+            "outreach_ratio_limit": 0.05,
             "max_links_per_day": 1,
             "report_tolerance": 1,
             "hibernate_hours": 336,  # 2 weeks
@@ -98,10 +98,10 @@ class AgePolicy:
         return days_since_nurture_start >= policy["first_message_day"]
 
     @classmethod
-    def can_start_infiltration(cls, age_tier: str, days_since_nurture_start: int) -> bool:
-        """Check whether the account is ready for infiltration tasks."""
+    def can_start_engagement(cls, age_tier: str, days_since_nurture_start: int) -> bool:
+        """Check whether the account is ready for engagement tasks."""
         policy = cls.get_policy(age_tier)
-        return days_since_nurture_start >= policy["start_infiltration_day"]
+        return days_since_nurture_start >= policy["start_engagement_day"]
 
     @classmethod
     def is_nurturing_complete(cls, age_tier: str, days_since_nurture_start: int) -> bool:

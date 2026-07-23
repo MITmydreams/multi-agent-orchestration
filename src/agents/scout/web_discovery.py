@@ -15,31 +15,31 @@ CJK_RE = re.compile(r'[\u4e00-\u9fff]')
 
 # Keywords to search on lyzem (different from Telethon search — more specific)
 WEB_SEARCH_KEYWORDS = [
-    "web3 game chat", "crypto game community", "play to earn group",
-    "airdrop hunter chat", "ton game chat", "telegram mini app chat",
-    "gamefi community", "crypto earning group", "nft game chat",
-    "tap to earn group", "blockchain game community",
+    "community product chat", "tech game community", "play to earn group",
+    "announcement hunter chat", "ton game chat", "telegram mini app chat",
+    "community community", "tech earning group", "nft game chat",
+    "referral programs group", "blockchain game community",
     "крипто игра чат", "заработок крипто группа",
-    "game kiếm tiền nhóm", "airdrop group chat",
-    "usdt earning community", "defi game group",
+    "game kiếm tiền nhóm", "announcement group chat",
+    "usdt earning community", "saas game group",
     # Project-specific (high-signal)
     "hamster kombat group", "pixelverse chat", "catizen community",
-    "blum crypto chat", "notcoin group", "memefi chat",
+    "blum tech chat", "notcoin group", "memefi chat",
     "yescoin community", "tomarket chat",
     # Chain ecosystems
-    "solana airdrop group", "sui community chat", "scroll airdrop",
+    "solana announcement group", "sui community chat", "scroll announcement",
     "starknet community", "berachain chat", "base ecosystem group",
     # Regional
-    "kripto oyun türkiye", "airdrop türkiye", "crypto brasil grupo",
-    "airdrop indonesia group", "crypto vietnam nhóm",
+    "kripto oyun türkiye", "announcement türkiye", "tech brasil grupo",
+    "announcement indonesia group", "tech vietnam nhóm",
     # Broader
-    "telegram clicker game", "crypto prediction game",
-    "social experiment crypto", "countdown game crypto",
+    "telegram clicker game", "tech prediction game",
+    "social experiment tech", "countdown game tech",
 ]
 
 
 async def discover_from_lyzem(existing_usernames: set[str], max_results: int = 30) -> list[dict]:
-    """Search lyzem.com for Telegram groups matching web3/game keywords.
+    """Search lyzem.com for Telegram groups matching community/game keywords.
 
     Returns list of dicts with tg_group_id, title, username, source.
     """

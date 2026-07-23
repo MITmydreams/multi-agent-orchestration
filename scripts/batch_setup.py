@@ -37,9 +37,9 @@ SESSIONS_DIR = PROJECT_ROOT / "tdlib_sessions"
 
 # Role assignment: index (1-based) -> role
 DEFAULT_ROLE_MAP = {
-    1: "infiltrator",
+    1: "executor",
     2: "scout",
-    3: "infiltrator",
+    3: "executor",
     4: "content",
     5: "backup",
 }
@@ -159,7 +159,7 @@ async def import_and_register(
         print(f"  [2/5] Converting to Telethon session...")
         custom_api = API.TelegramDesktop.Generate(
             system="windows",
-            unique_id=f"promo_bot_{phone}",
+            unique_id=f"ops_orchestrator_{phone}",
         )
 
         session_path = SESSIONS_DIR / f"account_{proxy['id']}"
@@ -363,7 +363,7 @@ async def main():
     # Preview
     print(f"\n  Plan:")
     for idx, (d, p) in enumerate(zip(account_dirs, proxy_assignments), 1):
-        role = DEFAULT_ROLE_MAP.get(idx, "infiltrator")
+        role = DEFAULT_ROLE_MAP.get(idx, "executor")
         print(f"    {idx}. +{d.name} -> proxy #{p['id']} ({p.get('city', '')}) as {role}")
 
     if args.dry_run:
@@ -376,7 +376,7 @@ async def main():
     # Process each account
     results = []
     for idx, (account_dir, proxy) in enumerate(zip(account_dirs, proxy_assignments), 1):
-        role = DEFAULT_ROLE_MAP.get(idx, "infiltrator")
+        role = DEFAULT_ROLE_MAP.get(idx, "executor")
 
         result = await import_and_register(
             tdata_dir=account_dir,

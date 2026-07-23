@@ -1,10 +1,10 @@
 [
   {
     "id": 1,
-    "host": "127.0.0.1",
+    "host": "xxxx",
     "port": 1080,
-    "username": "user",
-    "password": "pass",
+    "username": "xxxx",
+    "password": "xxxx",
     "protocol": "socks5",
     "country": "US",
     "city": "example",

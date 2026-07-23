@@ -1,4 +1,4 @@
-"""FastAPI backend for the promo-bot operations dashboard.
+"""FastAPI backend for the ops-orchestrator operations dashboard.
 
 Single-file FastAPI app exposing REST + WebSocket endpoints for monitoring
 the 15-account Telegram AI agent system.
@@ -77,7 +77,7 @@ def derive_health(active: int, hibernating: int, abandoned: int, avg_risk: float
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("\n" + "=" * 60)
-    print("  Promo-Bot Operations Dashboard")
+    print("  Ops Orchestrator Dashboard")
     print("  Listening on: http://0.0.0.0:8765")
     print("  Frontend:     http://localhost:8765/")
     print("  API root:     http://localhost:8765/api/overview")
@@ -87,7 +87,7 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
-app = FastAPI(title="Promo-Bot Dashboard API", lifespan=lifespan)
+app = FastAPI(title="Ops Orchestrator Dashboard API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -179,7 +179,7 @@ async def accounts() -> list[dict[str, Any]]:
             "risk_score": round(a.risk_score, 3),
             "trust_score": round(a.trust_score, 3),
             "messages_today": a.messages_sent_today,
-            "promo_today": a.promo_messages_today,
+            "promo_today": a.outreach_messages_today,
             "groups_today": a.groups_active_today,
             "total_messages": a.total_messages,
             "kicked_count": a.kicked_count,
@@ -241,7 +241,7 @@ async def activity(limit: int = Query(50, ge=1, le=500)) -> list[dict[str, Any]]
                 Group.title,
                 MessageLog.content,
                 MessageLog.sent_at,
-                MessageLog.is_promo,
+                MessageLog.is_outreach,
             )
             .join(Account, Account.id == MessageLog.account_id)
             .outerjoin(Group, Group.id == MessageLog.group_id)
@@ -288,7 +288,7 @@ async def activity(limit: int = Query(50, ge=1, le=500)) -> list[dict[str, Any]]
             "type": "message",
             "agent_id": r.account_id,
             "agent_name": r.display_name,
-            "action": f"{'promoted' if r.is_promo else 'sent message'} in {group_label}",
+            "action": f"{'promoted' if r.is_outreach else 'sent message'} in {group_label}",
             "details": (r.content or "")[:200],
             "timestamp": iso(r.sent_at),
         })
@@ -365,7 +365,7 @@ async def metrics_endpoint() -> dict[str, Any]:
         {
             "date": m.date.isoformat(),
             "messages_sent": m.messages_sent,
-            "promo_messages": m.promo_messages,
+            "outreach_messages": m.outreach_messages,
             "content_generated": m.content_generated,
             "risk_score": round(m.avg_risk_score, 3),
         }
@@ -436,15 +436,15 @@ async def agents_endpoint() -> dict[str, Any]:
             )
         ).scalar()
 
-        last_viral = (
+        last_event = (
             await s.execute(
-                select(func.max(AgentTask.started_at)).where(AgentTask.agent_type == "viral")
+                select(func.max(AgentTask.started_at)).where(AgentTask.agent_type == "event")
             )
         ).scalar()
-        viral_today = (
+        event_today = (
             await s.execute(
                 select(func.count(AgentTask.id)).where(
-                    AgentTask.agent_type == "viral",
+                    AgentTask.agent_type == "event",
                     AgentTask.created_at >= today_start,
                 )
             )
@@ -457,8 +457,8 @@ async def agents_endpoint() -> dict[str, Any]:
             "groups_evaluated": groups_evaluated,
             "last_run": iso(last_scout_run),
         },
-        "infiltrator": {
-            "accounts_count": role_counts.get("infiltrator", 0),
+        "executor": {
+            "accounts_count": role_counts.get("executor", 0),
             "groups_active": groups_active,
             "messages_sent_today": msgs_today,
         },
@@ -467,9 +467,9 @@ async def agents_endpoint() -> dict[str, Any]:
             "pieces_generated_today": content_today,
             "last_piece": iso(last_content),
         },
-        "viral": {
-            "events_handled_today": viral_today,
-            "last_event": iso(last_viral),
+        "event": {
+            "events_handled_today": event_today,
+            "last_event": iso(last_event),
         },
         "bot": {
             "status": "running",

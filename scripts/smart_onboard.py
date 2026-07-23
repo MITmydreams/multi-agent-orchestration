@@ -24,16 +24,16 @@ from opentele.api import API, UseCurrentSession
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-DB_URL = "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot"
+DB_URL = "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator"
 ACCOUNTS_DIR = Path("../tg_accounts")
 SESSIONS_DIR = Path("tdlib_sessions")
 PROXIES_FILE = Path("config/proxies.json")
 MAX_ACCOUNTS_PER_PROXY = 3
 
 # Role distribution for new accounts
-# 2-account test: 1 infiltrator + 1 scout
+# 2-account test: 1 executor + 1 scout
 NEW_ACCOUNT_ROLES = [
-    "infiltrator", "scout",
+    "executor", "scout",
 ]
 
 
@@ -78,7 +78,7 @@ async def import_one(phone, proxy, role, api_id, api_hash):
         # Step 2: Convert to Telethon session
         print("  [2/4] Converting to session...")
         custom_api = API.TelegramDesktop.Generate(
-            system="windows", unique_id=f"promo_bot_{phone}",
+            system="windows", unique_id=f"ops_orchestrator_{phone}",
         )
         session_path = SESSIONS_DIR / f"account_{proxy['id']}"
         session_path.mkdir(parents=True, exist_ok=True)
@@ -207,9 +207,9 @@ async def main():
                 await conn.execute(text("""
                     INSERT INTO accounts
                     (phone, phone_type, username, display_name, role, status, proxy_id, language,
-                     session_string, risk_score, trust_score, messages_sent_today, promo_messages_today,
+                     session_string, risk_score, trust_score, messages_sent_today, outreach_messages_today,
                      groups_active_today, new_groups_today, dms_initiated_today, links_sent_today,
-                     total_messages, total_promo_messages, kicked_count, reported, account_age_days)
+                     total_messages, total_outreach_messages, kicked_count, reported, account_age_days)
                     VALUES (:phone, 'virtual', :username, :display_name, :role, 'active', :proxy_id, 'en',
                             :session, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, :age)
                     ON CONFLICT (phone) DO NOTHING

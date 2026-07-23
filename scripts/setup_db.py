@@ -1,6 +1,6 @@
 """Database initialisation script.
 
-Creates all tables defined by SQLAlchemy ORM models.  Safe to re-run --
+Creates all tables saasned by SQLAlchemy ORM models.  Safe to re-run --
 ``create_all`` is a no-op for tables that already exist.
 
 Usage::

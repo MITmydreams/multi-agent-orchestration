@@ -1,7 +1,7 @@
 """Register a verified Telegram account into the PostgreSQL database.
 
 Usage:
-    cd /Users/hermit/Desktop/RWANS/Rwans_op/RWANS_TG_OP/promo-bot
+    cd /Users/hermit/Desktop/OPS/Rwans_op/OPS_TG_OP/ops-orchestrator
     source .venv/bin/activate
     PYTHONPATH=. python scripts/register_account.py
 """
@@ -34,7 +34,7 @@ async def register_account() -> None:
         "display_name": "Boyce Morris",
         "bio": None,
         "avatar_url": None,
-        "role": "infiltrator",
+        "role": "executor",
         "persona_id": None,
         "language": "en",
         "status": "active",  # Already verified via opentele
@@ -47,14 +47,14 @@ async def register_account() -> None:
         "session_string": "tdlib_sessions/account_1/10000000001.session",
         # Daily counters start at 0
         "messages_sent_today": 0,
-        "promo_messages_today": 0,
+        "outreach_messages_today": 0,
         "groups_active_today": 0,
         "new_groups_today": 0,
         "dms_initiated_today": 0,
         "links_sent_today": 0,
         # Lifetime counters start at 0
         "total_messages": 0,
-        "total_promo_messages": 0,
+        "total_outreach_messages": 0,
         "kicked_count": 0,
         # Risk flags
         "reported": False,

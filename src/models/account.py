@@ -19,7 +19,7 @@ class Account(Base):
     display_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
-    role: Mapped[str] = mapped_column(String(20), nullable=False, comment="scout | infiltrator | content | backup")
+    role: Mapped[str] = mapped_column(String(20), nullable=False, comment="scout | executor | content | backup")
     persona_id: Mapped[str | None] = mapped_column(String(64), nullable=True, comment="FK to persona template")
     language: Mapped[str] = mapped_column(String(8), nullable=False, default="en", comment="en, zh, ja, ko, th")
     status: Mapped[str] = mapped_column(
@@ -35,7 +35,7 @@ class Account(Base):
 
     # Daily counters (reset by scheduler)
     messages_sent_today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    promo_messages_today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    outreach_messages_today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     groups_active_today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     new_groups_today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     dms_initiated_today: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
@@ -43,7 +43,7 @@ class Account(Base):
 
     # Lifetime counters
     total_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    total_promo_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    total_outreach_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     kicked_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     # Risk flags

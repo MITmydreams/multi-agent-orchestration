@@ -22,7 +22,7 @@ class MessageLog(Base):
     dm_user_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True, comment="For similarity detection")
-    is_promo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_outreach: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     message_type: Mapped[str] = mapped_column(
         String(20), nullable=False, default="chat",
         comment="chat | promo | response | content",
@@ -30,7 +30,7 @@ class MessageLog(Base):
     sent_at: Mapped[datetime] = mapped_column(nullable=False, server_default=func.now())
 
     def __repr__(self) -> str:
-        return f"<MessageLog id={self.id} account_id={self.account_id} type={self.message_type} promo={self.is_promo}>"
+        return f"<MessageLog id={self.id} account_id={self.account_id} type={self.message_type} promo={self.is_outreach}>"
 
 
 class ContentPiece(Base):

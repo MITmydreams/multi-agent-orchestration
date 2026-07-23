@@ -123,7 +123,7 @@ async def action_check(account: Account, proxies_map: dict):
         print(f"  Trust Score:   {account.trust_score}")
         print(f"  Proxy:         #{account.proxy_id}")
         print(f"  Msgs Today:    {account.messages_sent_today}")
-        print(f"  Promo Today:   {account.promo_messages_today}")
+        print(f"  Promo Today:   {account.outreach_messages_today}")
         print(f"  Total Msgs:    {account.total_messages}")
         print(f"  Kicked:        {account.kicked_count}")
         print(f"  Last Active:   {account.last_active or 'never'}")

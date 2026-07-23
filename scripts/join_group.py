@@ -1,7 +1,7 @@
 """Join a Telegram group with specified accounts.
 
 Usage:
-    .venv/bin/python scripts/join_group.py --group thebuttongroup --accounts 1,2,3,4
+    .venv/bin/python scripts/join_group.py --group example_group --accounts 1,2,3,4
 """
 import os
 import argparse
@@ -21,7 +21,7 @@ from telethon import TelegramClient, functions
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-DB_URL = "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot"
+DB_URL = "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator"
 PROXIES_FILE = Path("config/proxies.json")
 
 

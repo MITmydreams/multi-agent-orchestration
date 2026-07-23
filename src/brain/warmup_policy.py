@@ -31,7 +31,7 @@ class WarmupStage:
             open-ended tier.
         max_new_groups_per_day: Max new group joins allowed per day.
         max_messages_per_day: Max outgoing messages allowed per day.
-        allow_promo: Whether soft promotional content is permitted.
+        allow_promo: Whether soft outreach content is permitted.
         allow_dm: Whether direct messaging other users is permitted.
         description: Human-readable behavioural guideline.
     """
@@ -56,7 +56,7 @@ class WarmupPolicy:
         WarmupStage("primary", 6, 10, 2, 5, False, False, "偶尔回复，不主动起话题"),
         WarmupStage("middle", 11, 20, 3, 10, False, True, "原创内容、加好友"),
         WarmupStage("high", 21, 30, 3, 15, False, True, "进入 trust 阶段"),
-        WarmupStage("college", 31, 60, 4, 20, True, True, "可以做软推广"),
+        WarmupStage("college", 31, 60, 4, 20, True, True, "可以做软触达"),
         WarmupStage("adult", 61, None, 5, 30, True, True, "完全活跃"),
     ]
 
@@ -91,7 +91,7 @@ class WarmupPolicy:
 
     @classmethod
     def can_promote(cls, age_days: int) -> bool:
-        """Whether soft promotion is allowed at this age."""
+        """Whether soft outreach is allowed at this age."""
         return cls.get_stage(age_days).allow_promo
 
     @classmethod

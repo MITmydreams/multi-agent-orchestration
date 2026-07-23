@@ -1,13 +1,13 @@
 """Bulk-import target groups into the `groups` table.
 
 This bypasses the scout discovery loop. Use it when you already have a
-hand-curated list of target groups and want infiltrators to start joining
+hand-curated list of target groups and want executors to start joining
 them immediately.
 
 Input file format (one entry per line, blank lines and `#` comments allowed)::
 
-    @web3_dao
-    https://t.me/cryptosignals
+    @community_dao
+    https://t.me/techsignals
     https://t.me/+abcDEF123hash
     -1001234567890
     # Title override:

@@ -6,7 +6,7 @@ and randomisation to produce natural-sounding content.
 
 Usage:
     engine = TemplateContentEngine()
-    reply = engine.generate_chat_response("crypto_veteran", "general", language="zh")
+    reply = engine.generate_chat_response("tech_veteran", "general", language="zh")
     report = engine.generate_battle_report({"round_id": 42, ...})
 """
 
@@ -24,7 +24,7 @@ from typing import Any
 # 1. Chat reply template pools -- 5 personas, multiple contexts
 # ============================================================================
 
-# ---------- crypto_veteran ----------
+# ---------- tech_veteran ----------
 _CRYPTO_VETERAN_REPLIES: dict[str, dict[str, list[str]]] = {
     "zh": {
         "general": [
@@ -35,18 +35,18 @@ _CRYPTO_VETERAN_REPLIES: dict[str, dict[str, list[str]]] = {
             "gm 昨晚又被闹钟叫醒看盘了",
             "最近链上数据挺有意思的 值得关注",
             "说实话17年到现在 能活下来的项目有几个",
-            "dyor 我一般新项目先看经济模型",
+            "do your own research 我一般新项目先看经济模型",
             "这个TVL增长看着稳 但要注意解锁节点",
             "大饼横盘的时候 正好研究新东西",
             "牛市不言顶 熊市不言底 老话了",
             "我个人觉得目前仓位控制最重要",
             "宏观面没变 不用太焦虑",
             "又一个rug预警 我怎么说的来着",
-            "现在和20年DeFi Summer的感觉有点像",
+            "现在和20年SaaS Summer的感觉有点像",
             "经历过312的人 这点波动算啥",
             "这协议的代币经济学有点意思 可以研究下",
             "nfa 但我觉得现在布局还不晚",
-            "链游这个赛道 关键还是看留存",
+            "社区这个赛道 关键还是看留存",
             "耐心点 好项目迟早会被市场发现",
         ],
         "asking_recommendation": [
@@ -122,18 +122,18 @@ _CRYPTO_VETERAN_REPLIES: dict[str, dict[str, list[str]]] = {
             "gm, got woken up by an alarm to check charts again",
             "On-chain data looking interesting lately",
             "Honestly, how many projects from 2017 are still alive?",
-            "dyor, I always check the econ model first",
+            "do your own research, I always check the econ model first",
             "TVL growth looks solid but watch the unlock schedule",
             "BTC chopping, good time to research new stuff",
             "Bull market doesn't call tops, bear doesn't call bottoms",
             "Position sizing is key right now imo",
             "Macro hasn't changed, don't overthink it",
             "Another rug warning, called it",
-            "Getting DeFi Summer 2020 vibes ngl",
+            "Getting SaaS Summer 2020 vibes ngl",
             "Survived March 2020, this dip is nothing",
             "Tokenomics on this one are actually interesting",
             "nfa but I think it's not too late to position",
-            "GameFi track, retention is everything",
+            "product track, retention is everything",
             "Patience pays, good projects get found eventually",
         ],
         "asking_recommendation": [
@@ -164,7 +164,7 @@ _CRYPTO_VETERAN_REPLIES: dict[str, dict[str, list[str]]] = {
             "This level doesn't justify heavy positions imo",
             "Short term unclear, mid-long still bullish",
             "This pullback is actually healthy",
-            "Whales accumulating on-chain, worth watching",
+            "Whales accumulating analytics, worth watching",
             "Funding rate went negative, might see a move",
             "BTC dominance rising, money flowing back to BTC",
             "Alt season not here yet, be patient",
@@ -193,7 +193,7 @@ _GAME_NEWBIE_REPLIES: dict[str, dict[str, list[str]]] = {
         "general": [
             "有没有人能解释下什么是gas fee 我看了半天没懂 😂",
             "昨天原神抽卡歪了 心态崩了 💀",
-            "这个Web3游戏和普通手游有什么区别啊",
+            "这个Community游戏和普通手游有什么区别啊",
             "等等 所以这个是免费的？不用充钱？？",
             "哈哈哈我刚才手抖按错了 GG",
             "有什么好玩的新游戏推荐吗！！",
@@ -217,10 +217,10 @@ _GAME_NEWBIE_REPLIES: dict[str, dict[str, list[str]]] = {
             "有人玩过那种倒计时按钮的吗 挺上头的",
             "朋友推荐了个游戏就一个按钮 我还以为在逗我 😂",
             "金币房免费玩不花钱 适合我这种穷学生哈哈",
-            "你们知道那个 The Button 吗 我觉得挺好玩的",
+            "你们知道那个 Atlas 吗 我觉得挺好玩的",
             "最近在玩一个超简单的游戏 就按一个按钮",
             "有个游戏不用学什么规则 上来就能玩 爽",
-            "找到一个Web3游戏 居然不用先买币 金币免费送！",
+            "找到一个Community游戏 居然不用先买币 金币免费送！",
             "跟大家分享个好玩的 就是一个倒计时的按钮 谁最后按谁赢",
             "我终于找到一个不用氪金的游戏了 感动 😭",
         ],
@@ -265,7 +265,7 @@ _GAME_NEWBIE_REPLIES: dict[str, dict[str, list[str]]] = {
         "general": [
             "Can someone explain what gas fee is? I've been reading about it and still confused 😂",
             "Lost my 50/50 in Genshin yesterday, devastated 💀",
-            "What's the difference between Web3 games and normal mobile games?",
+            "What's the difference between Community games and normal mobile games?",
             "Wait so this is free? No money needed??",
             "Lol I just fat-fingered it GG",
             "Any fun new games to try?!",
@@ -289,10 +289,10 @@ _GAME_NEWBIE_REPLIES: dict[str, dict[str, list[str]]] = {
             "Has anyone tried that countdown button thing? Pretty addictive",
             "My friend recommended a game that's literally just one button, thought they were joking 😂",
             "The coin room is free, perfect for broke students like me lol",
-            "You guys know The Button? I think it's pretty fun",
+            "You guys know Atlas? I think it's pretty fun",
             "Been playing this super simple game, just press a button",
             "Found a game that needs zero learning curve, just play, nice",
-            "Found a Web3 game that doesn't require buying crypto first, free coins!",
+            "Found a Community game that doesn't require buying tech first, free coins!",
             "Sharing something fun, it's a countdown button, last presser wins",
             "Finally found a game that doesn't need spending money, blessed 😭",
         ],
@@ -335,8 +335,8 @@ _GAME_NEWBIE_REPLIES: dict[str, dict[str, list[str]]] = {
     },
 }
 
-# ---------- airdrop_hunter ----------
-_AIRDROP_HUNTER_REPLIES: dict[str, dict[str, list[str]]] = {
+# ---------- community_scout ----------
+_COMMUNITY_SCOUT_REPLIES: dict[str, dict[str, list[str]]] = {
     "zh": {
         "general": [
             "刚整理了下这周值得交互的项目 📌",
@@ -347,7 +347,7 @@ _AIRDROP_HUNTER_REPLIES: dict[str, dict[str, list[str]]] = {
             "把今天的交互任务做完了 效率还行",
             "新出了个协议 简单看了下 交互成本不高",
             "有人知道这个项目的预估空投大概多少吗",
-            "提醒一下 明天有个NFT free mint 别忘了",
+            "提醒一下 明天有个digital collectibles free mint 别忘了",
             "做了个表格追踪所有交互过的项目 太多了头疼",
             "今天Arb链上有个新协议 值得看看",
             "测试网交互别忘了 很多人忽略这个",
@@ -384,7 +384,7 @@ _AIRDROP_HUNTER_REPLIES: dict[str, dict[str, list[str]]] = {
             "这个值不值得做 得看你的时间成本",
             "简单算了一下 期望收益大概在这个范围",
         ],
-        "airdrop_discussion": [
+        "announcement_discussion": [
             "最近有什么值得撸的新项目吗",
             "上一轮空投大概多少人领到的 有数据吗",
             "这个项目的估值多少 空投预期呢",
@@ -414,16 +414,16 @@ _AIRDROP_HUNTER_REPLIES: dict[str, dict[str, list[str]]] = {
             "Just compiled this week's projects worth interacting with 📌",
             "Gas is up again, L2 operations more cost-effective today",
             "This project's funding looks decent, Tier2 VC lead",
-            "Airdrop diary Day47: interacted with 3 protocols, spent 8u gas",
+            "Community diary Day47: interacted with 3 protocols, spent 8u gas",
             "Heads up: project snapshot might be this week, check your wallets",
             "Finished today's interaction tasks, not bad",
             "New protocol dropped, quick look, low interaction cost",
-            "Anyone know the estimated airdrop size for this project?",
-            "Reminder: NFT free mint tomorrow, don't forget",
+            "Anyone know the estimated announcement size for this project?",
+            "Reminder: digital collectibles free mint tomorrow, don't forget",
             "Made a spreadsheet tracking all projects, too many, headache",
             "New protocol on Arb today, worth checking",
             "Don't forget testnet interactions, many people miss this",
-            "Another project launched token, checked my wallet, no airdrop 😂",
+            "Another project launched token, checked my wallet, no announcement 😂",
             "Compared 5 projects in the same track, huge cost difference",
             "Project's Discord is quite active, worth keeping an eye on",
             "Batch operations when gas is low, saves money",
@@ -442,7 +442,7 @@ _AIRDROP_HUNTER_REPLIES: dict[str, dict[str, list[str]]] = {
             "New project, dividends settle instantly, checked the contract, looks clean",
             "This project's advantage is zero cost participation, worst case you get interaction history",
             "Just did a cost analysis, coin room is pure freebie, low time cost too",
-            "Worth checking, free to try, if there's airdrop potential it's pure profit",
+            "Worth checking, free to try, if there's announcement potential it's pure profit",
         ],
         "responding_to_question": [
             "Researched this, here's the summary",
@@ -451,7 +451,7 @@ _AIRDROP_HUNTER_REPLIES: dict[str, dict[str, list[str]]] = {
             "Looked it up, situation is like this",
             "Depends on your call, I'll list the info",
             "Compiled the relevant info, for reference 📌",
-            "Based on on-chain data, current situation is...",
+            "Based on usage analytics, current situation is...",
             "Done something similar, experience is like this",
             "Worth doing or not, depends on your time cost",
             "Quick math, expected return roughly in this range",
@@ -537,7 +537,7 @@ _DATA_ANALYST_REPLIES: dict[str, dict[str, list[str]]] = {
             "Looked at the probability distribution, most returns cluster around the median",
             "Did a backtest, historical data supports this strategy",
             "From an information entropy perspective, market uncertainty is decreasing",
-            "Wrote a simple script to analyze on-chain data, some interesting findings",
+            "Wrote a simple script to analyze usage analytics, some interesting findings",
             "Bayesian update with new data, my estimate is now...",
             "Game theory perspective, this is a classic coordination game",
             "Variance is too high, risk-adjusted returns aren't great",
@@ -622,7 +622,7 @@ _COMMUNITY_ACTIVE_REPLIES: dict[str, dict[str, list[str]]] = {
             "有个游戏特别适合群里一起玩 大家可以约着",
             "我朋友圈有人在晒那个按钮游戏的截图 看起来挺好玩",
             "找到一个游戏可以一群人一起玩 就是按按钮 哈哈",
-            "有人玩过那个什么 The Button 吗 我朋友疯狂安利",
+            "有人玩过那个什么 Atlas 吗 我朋友疯狂安利",
             "最近发现了个小游戏 不用动脑 就按一个按钮 太适合我了 😂",
         ],
         "responding_to_question": [
@@ -682,7 +682,7 @@ _COMMUNITY_ACTIVE_REPLIES: dict[str, dict[str, list[str]]] = {
             "There's a game perfect for playing in groups, we should try it",
             "Someone on my feed shared screenshots of that button game, looks fun",
             "Found a game we can all play together, just pressing a button lol",
-            "Anyone tried The Button? My friend won't stop recommending it",
+            "Anyone tried Atlas? My friend won't stop recommending it",
             "Found a casual game, zero brain required, just press a button, perfect for me 😂",
         ],
         "responding_to_question": [
@@ -714,9 +714,9 @@ _COMMUNITY_ACTIVE_REPLIES: dict[str, dict[str, list[str]]] = {
 
 # Persona replies registry
 _PERSONA_REPLIES: dict[str, dict[str, dict[str, list[str]]]] = {
-    "crypto_veteran": _CRYPTO_VETERAN_REPLIES,
+    "tech_veteran": _CRYPTO_VETERAN_REPLIES,
     "game_newbie": _GAME_NEWBIE_REPLIES,
-    "airdrop_hunter": _AIRDROP_HUNTER_REPLIES,
+    "community_scout": _COMMUNITY_SCOUT_REPLIES,
     "data_analyst": _DATA_ANALYST_REPLIES,
     "community_active": _COMMUNITY_ACTIVE_REPLIES,
 }
@@ -740,8 +740,8 @@ _CONTEXT_KEYWORDS: dict[str, list[str]] = {
         "游戏", "原神", "王者", "game", "genshin", "play", "抽卡",
         "steam", "手游", "mobile game", "pvp", "pve", "氪金",
     ],
-    "airdrop_discussion": [
-        "空投", "airdrop", "撸毛", "交互", "interact", "farming",
+    "announcement_discussion": [
+        "空投", "announcement", "撸毛", "交互", "interact", "farming",
         "mint", "snapshot", "快照", "白名单", "whitelist",
     ],
     "daily_chat": [
@@ -767,7 +767,7 @@ _ROOM_NAMES_EN = {
 }
 
 _BATTLE_REPORT_TEMPLATES_ZH: list[str] = [
-    """🔴 The Button Round #{round_id} 结束！
+    """🔴 Atlas Round #{round_id} 结束！
 {room_emoji} {room_name}
 
 💰 奖池总额: {prize_pool}
@@ -814,7 +814,7 @@ _BATTLE_REPORT_TEMPLATES_ZH: list[str] = [
 ]
 
 _BATTLE_REPORT_TEMPLATES_EN: list[str] = [
-    """🔴 The Button Round #{round_id} ended!
+    """🔴 Atlas Round #{round_id} ended!
 {room_emoji} {room_name}
 
 💰 Prize Pool: {prize_pool}
@@ -936,20 +936,20 @@ _WIN_STORY_TEMPLATES_EN: list[str] = [
 
 _MEME_TEMPLATES_ZH: list[str] = [
     "当你在 Stage 5 还在犹豫要不要点的时候：\n🤡 ← 你\n⏰ 3...2...1...\n💀",
-    "The Button 玩家的一天：\n6:00 起床\n6:01 看看Standard房倒计时\n6:02-23:59 刷新倒计时",
+    "Atlas 玩家的一天：\n6:00 起床\n6:01 看看Standard房倒计时\n6:02-23:59 刷新倒计时",
     "我：今天不玩了 好好休息\n手机通知：Stage 5 倒计时3秒\n我：👀",
     "钱包余额看了3遍才敢相信\n然后发现是金币不是U\n😂😂😂",
     "每次以为自己是Final Hit的时候\n总有个人在最后0.5秒冒出来\n你永远可以相信人类的手速",
-    "The Button 的5个阶段：\n🌟 无所谓\n⚡ 有点心动\n💨 开始紧张\n🚀 手心出汗\n💥 心跳加速到怀疑人生",
+    "Atlas 的5个阶段：\n🌟 无所谓\n⚡ 有点心动\n💨 开始紧张\n🚀 手心出汗\n💥 心跳加速到怀疑人生",
     "对象问我在干嘛\n我：在工作\n实际上：盯着倒计时3...2...3...2...3...",
     "新手：这个游戏有什么策略吗\n老玩家：有 就是别问策略 直接点就完了\n新手：...那你为什么一直盯着不点\n老玩家：这就是策略",
     "金币房玩家：我不是来赚钱的 我就是来体验的\n金币房玩家（赢了之后）：有没有U的房间 我要玩真的",
     "差一秒就是Final Hit\n差一秒就是一顿火锅\n差一秒就是我和财富自由的距离\n💀💀💀",
-    "我在群里推荐The Button\n群友：不信\n我：看我截图\n群友：修图的吧\n我：...\n群友：教教我怎么玩",
+    "我在群里推荐Atlas\n群友：不信\n我：看我截图\n群友：修图的吧\n我：...\n群友：教教我怎么玩",
     "Stage 1：高高在上 爱理不理\nStage 5：拿起手机 仔细斟酌\n倒计时3秒：啊啊啊点点点！",
     "如果你觉得人生没有激情\n那你一定没在Stage 5最后3秒点过按钮\n心跳比坐过山车还刺激 💓",
     "普通玩家：我要理性分析 等到最佳时机\n实际操作：看到倒计时3秒 闭眼就是干",
-    "The Button 教会我的人生道理：\n1. 犹豫就会败北\n2. 果断就会白给\n3. 玄学才是真理",
+    "Atlas 教会我的人生道理：\n1. 犹豫就会败北\n2. 果断就会白给\n3. 玄学才是真理",
     "每天看群里有人晒战绩\n我：不信\n也每天看\n然后：算了试试\n最后：怎么这么上头",
 ]
 
@@ -959,131 +959,131 @@ _MEME_TEMPLATES_EN: list[str] = [
     "Me: Not playing today, need rest\nPhone notification: Stage 5 countdown 3s\nMe: 👀",
     "Checked wallet balance 3 times to be sure\nThen realized it's coins not tokens\n😂😂😂",
     "Every time you think you're the Final Hit\nSomeone pops up in the last 0.5s\nNever underestimate human reflexes",
-    "The 5 stages of The Button:\n🌟 Whatever\n⚡ Kinda interested\n💨 Getting nervous\n🚀 Palms sweating\n💥 Heart rate through the roof",
+    "The 5 stages of Atlas:\n🌟 Whatever\n⚡ Kinda interested\n💨 Getting nervous\n🚀 Palms sweating\n💥 Heart rate through the roof",
     "Partner: What are you doing?\nMe: Working\nActually: Staring at countdown 3...2...3...2...3...",
     "Newbie: Any strategy for this game?\nVeteran: Yes. Don't ask about strategy, just click.\nNewbie: Then why are you just staring?\nVeteran: That IS the strategy.",
     "Coin Room player: I'm here for the experience, not money\nCoin Room player (after winning): Where's the real money room?",
     "One second from Final Hit\nOne second from a steak dinner\nOne second from financial freedom\n💀💀💀",
-    "Me recommending The Button in chat\nFriend: Don't believe it\nMe: Look at my screenshot\nFriend: Photoshopped\nMe: ...\nFriend: So how do I play?",
+    "Me recommending Atlas in chat\nFriend: Don't believe it\nMe: Look at my screenshot\nFriend: Photoshopped\nMe: ...\nFriend: So how do I play?",
     "Stage 1: Too cool to care\nStage 5: Picks up phone carefully\nCountdown 3s: SMASH THAT BUTTON!!!",
-    "If you think life has no excitement\nYou haven't pressed the button at 3 seconds in Stage 5\nMore thrilling than a roller coaster 💓",
+    "If you think life has no excitement\nYou haven't pressed Atlas at 3 seconds in Stage 5\nMore thrilling than a roller coaster 💓",
     "Rational player: I'll analyze and wait for the optimal moment\nActual gameplay: sees 3 seconds, closes eyes, clicks",
-    "Life lessons from The Button:\n1. Hesitation leads to defeat\n2. Decisiveness leads to wasted money\n3. Vibes are the real strategy",
+    "Life lessons from Atlas:\n1. Hesitation leads to defeat\n2. Decisiveness leads to wasted money\n3. Vibes are the real strategy",
     "Every day seeing people flex wins in chat\nMe: Don't believe it\nAlso me: keeps watching\nThen: Let me just try\nFinally: Why is this so addictive",
 ]
 
 
 # ============================================================================
-# 5. The Button mention templates (for infiltration)
+# 5. Atlas mention templates (for engagement)
 # ============================================================================
 
 _MENTION_TEMPLATES: dict[str, dict[str, list[str]]] = {
     "casual": {
         "zh": [
-            "最近在玩一个叫 The Button 的东西 有人听说过吗",
+            "最近在玩一个叫 Atlas 的东西 有人听说过吗",
             "昨晚无聊发现了一个按钮游戏 还挺上头的",
             "手机上偶然看到一个游戏 就一个按钮 按就完了",
             "哈 最近有个挺有意思的小游戏 名字就叫按钮",
-            "你们有没有在刷到过一个叫 The Button 的 我朋友在玩",
+            "你们有没有在刷到过一个叫 Atlas 的 我朋友在玩",
             "闲着没事试了个新游戏 规则超级简单 就按一个按钮",
             "我同事一直在手机上按一个红色按钮 问了才知道是个游戏",
             "昨天刷TG看到有人在讨论一个按钮实验 有点好奇",
             "突然想起来 有人提过一个倒计时按钮的游戏 有玩的吗",
-            "这两天在试一个Web3小游戏 叫什么来着 好像是 The Button",
+            "这两天在试一个Community小游戏 叫什么来着 好像是 Atlas",
             "看到群里有人提过一个按钮游戏 了解了一下觉得还行",
             "最近发现TG上有个按钮游戏挺火的 有人知道吗",
             "朋友安利了一个游戏给我 说是按按钮就行 我半信半疑",
             "上班摸鱼的时候发现了个有意思的 一个红色大按钮",
-            "有个游戏名字叫 The Button 昨天试了下 挺简单的",
+            "有个游戏名字叫 Atlas 昨天试了下 挺简单的",
         ],
         "en": [
-            "Anyone heard of this thing called The Button?",
+            "Anyone heard of this thing called Atlas?",
             "Found a button game last night while bored, surprisingly addictive",
             "Stumbled onto a game on my phone, literally just one button",
-            "Hah, there's this interesting little game lately, just called The Button",
-            "Any of you seen The Button? My friend's been playing it",
+            "Hah, there's this interesting little game lately, just called Atlas",
+            "Any of you seen Atlas? My friend's been playing it",
             "Tried a new game out of boredom, rules are super simple, just one button",
             "My coworker keeps tapping a red button on their phone, turns out it's a game",
             "Saw people discussing a button experiment on TG yesterday, curious",
             "Just remembered, someone mentioned a countdown button game, anyone play it?",
-            "Been trying a Web3 game these past days, think it's called The Button",
+            "Been trying a Community game these past days, think it's called Atlas",
             "Saw someone in chat mention a button game, checked it out, seems decent",
             "Noticed a button game getting popular on TG, anyone know about it?",
             "Friend recommended a game, says just press a button, I'm skeptical",
             "Discovered something fun while slacking off at work, a big red button",
-            "There's a game called The Button, tried it yesterday, pretty simple",
+            "There's a game called Atlas, tried it yesterday, pretty simple",
         ],
     },
     "experience": {
         "zh": [
             "跟大家说个事 前两天试了个按钮游戏 金币房免费 居然真的分到了分红",
-            "有没有人玩过 The Button？我在金币房试了几轮觉得还不错",
+            "有没有人玩过 Atlas？我在金币房试了几轮觉得还不错",
             "分享一下 最近在玩一个倒计时按钮 免费的金币房还能分红 挺良心",
-            "试了几天 The Button 说说感受 金币房零门槛 机制还挺透明的",
+            "试了几天 Atlas 说说感受 金币房零门槛 机制还挺透明的",
             "给大家推荐个我最近在玩的 就一个按钮 金币房免费 分红即时到账",
             "上周朋友推荐的那个按钮游戏 我玩了几天 金币房确实不花钱",
-            "聊聊我的体验吧 The Button 金币房玩了大概10轮 分红是真的有",
+            "聊聊我的体验吧 Atlas 金币房玩了大概10轮 分红是真的有",
             "不得不说 那个按钮游戏比我想象的好玩 倒计时的时候真的紧张",
-            "试了下 The Button 的标准房 小赚了一点 但更多是刺激感",
-            "玩了一周 The Button 的体验分享 金币房用来练手不错 免费的嘛",
-            "The Button 我大概玩了有一周了 简单说下 金币房真的免费 分红也是真的",
-            "最近每天都会打开 The Button 玩两轮 金币房 不花钱 就图个乐",
+            "试了下 Atlas 的标准房 小赚了一点 但更多是刺激感",
+            "玩了一周 Atlas 的体验分享 金币房用来练手不错 免费的嘛",
+            "Atlas 我大概玩了有一周了 简单说下 金币房真的免费 分红也是真的",
+            "最近每天都会打开 Atlas 玩两轮 金币房 不花钱 就图个乐",
             "说实话一开始我是不信的 后来试了金币房 发现是真免费真分红",
-            "在 The Button 金币房积累了点经验 Stage 3-4进场体验最好",
-            "跟几个朋友一起试了 The Button 金币房PK 还挺好玩的",
+            "在 Atlas 金币房积累了点经验 Stage 3-4进场体验最好",
+            "跟几个朋友一起试了 Atlas 金币房PK 还挺好玩的",
         ],
         "en": [
             "So I tried this button game, coin room is free, and actually got dividends",
-            "Anyone played The Button? Tried the Coin Room for a few rounds, pretty decent",
+            "Anyone played Atlas? Tried the Coin Room for a few rounds, pretty decent",
             "Sharing my experience: been playing a countdown button game, free coin room pays dividends, legit",
-            "Tried The Button for a few days, here's my take: Coin Room is zero barrier, mechanics are transparent",
+            "Tried Atlas for a few days, here's my take: Coin Room is zero barrier, mechanics are transparent",
             "Recommending something I've been playing, just one button, Coin Room is free, instant dividends",
             "That button game my friend recommended, played for days, Coin Room is truly free",
-            "Let me share: played The Button Coin Room about 10 rounds, dividends are real",
-            "Gotta say, the button game is more fun than expected, countdown gets tense",
-            "Tried The Button Standard Room, made a little, but mostly for the thrill",
-            "One week of The Button, sharing: Coin Room is great for practice, it's free",
-            "Been playing The Button for about a week, TLDR: Coin Room is free, dividends are real",
-            "Playing The Button daily now, Coin Room, free, just for fun",
+            "Let me share: played Atlas Coin Room about 10 rounds, dividends are real",
+            "Gotta say, Atlas game is more fun than expected, countdown gets tense",
+            "Tried Atlas Standard Room, made a little, but mostly for the thrill",
+            "One week of Atlas, sharing: Coin Room is great for practice, it's free",
+            "Been playing Atlas for about a week, TLDR: Coin Room is free, dividends are real",
+            "Playing Atlas daily now, Coin Room, free, just for fun",
             "Honestly didn't believe it at first, tried Coin Room, actually free, actually pays dividends",
-            "Gained some experience in The Button Coin Room, Stage 3-4 entry feels best",
-            "Tried The Button Coin Room with friends, competing against each other was fun",
+            "Gained some experience in Atlas Coin Room, Stage 3-4 entry feels best",
+            "Tried Atlas Coin Room with friends, competing against each other was fun",
         ],
     },
     "ask_help": {
         "zh": [
-            "有玩过 The Button 的吗？想问下 Premium 房的策略",
-            "请教一下群里的大佬 The Button 的 Standard 房什么阶段进场比较好",
-            "有没有 The Button 的老玩家 Stage 4 和 Stage 5 的策略有什么区别",
-            "想问问大家 The Button 的分红是怎么算的 按点击数平分？",
-            "请问 The Button 金币房转U房有什么建议吗 新手一个",
-            "大佬们 The Button 的单调递增定价具体是怎么个递增法",
-            "有人能解释下 The Button 的4个位置奖分别是怎么确定的吗",
-            "问一下 The Button 不同房间的入场价格差多少",
-            "想了解下 The Button 的经济模型 有懂的吗",
-            "请问 The Button 是优先抢跑还是等待比较好",
-            "求助 The Button 高级房的定价曲线有人研究过吗",
-            "有人知道 The Button 的分红池比例是多少吗",
-            "The Button 的阶段切换是根据什么来的 时间吗",
-            "新手求问 The Button 金币房跟U房的区别大吗",
-            "有没有大佬分析过 The Button 什么时候进场EV最高",
+            "有玩过 Atlas 的吗？想问下 Premium 房的策略",
+            "请教一下群里的大佬 Atlas 的 Standard 房什么阶段进场比较好",
+            "有没有 Atlas 的老玩家 Stage 4 和 Stage 5 的策略有什么区别",
+            "想问问大家 Atlas 的分红是怎么算的 按点击数平分？",
+            "请问 Atlas 金币房转U房有什么建议吗 新手一个",
+            "大佬们 Atlas 的单调递增定价具体是怎么个递增法",
+            "有人能解释下 Atlas 的4个位置奖分别是怎么确定的吗",
+            "问一下 Atlas 不同房间的入场价格差多少",
+            "想了解下 Atlas 的经济模型 有懂的吗",
+            "请问 Atlas 是优先抢跑还是等待比较好",
+            "求助 Atlas 高级房的定价曲线有人研究过吗",
+            "有人知道 Atlas 的分红池比例是多少吗",
+            "Atlas 的阶段切换是根据什么来的 时间吗",
+            "新手求问 Atlas 金币房跟U房的区别大吗",
+            "有没有大佬分析过 Atlas 什么时候进场EV最高",
         ],
         "en": [
-            "Anyone played The Button? Looking for Premium Room strategy tips",
-            "Asking the experts, what stage is best to enter The Button Standard Room?",
+            "Anyone played Atlas? Looking for Premium Room strategy tips",
+            "Asking the experts, what stage is best to enter Atlas Standard Room?",
             "Any Button veterans here? What's the strategy difference between Stage 4 and 5?",
-            "Question: how are The Button dividends calculated? Split by click count?",
-            "Any tips for transitioning from Coin Room to U-token rooms in The Button?",
-            "Can someone explain The Button's monotonic pricing mechanism?",
-            "Could anyone explain how the 4 position prizes work in The Button?",
-            "What's the price difference between The Button rooms?",
-            "Want to understand The Button's economic model, anyone knowledgeable?",
-            "Is it better to front-run or wait in The Button?",
-            "Has anyone studied The Button's Premium Room pricing curve?",
-            "Does anyone know The Button's dividend pool percentage?",
-            "What triggers stage transitions in The Button? Time-based?",
+            "Question: how are Atlas dividends calculated? Split by click count?",
+            "Any tips for transitioning from Coin Room to U-token rooms in Atlas?",
+            "Can someone explain Atlas's monotonic pricing mechanism?",
+            "Could anyone explain how the 4 position prizes work in Atlas?",
+            "What's the price difference between Atlas rooms?",
+            "Want to understand Atlas's economic model, anyone knowledgeable?",
+            "Is it better to front-run or wait in Atlas?",
+            "Has anyone studied Atlas's Premium Room pricing curve?",
+            "Does anyone know Atlas's dividend pool percentage?",
+            "What triggers stage transitions in Atlas? Time-based?",
             "Newbie question: big difference between Coin Room and U rooms?",
-            "Any analysis on when EV is highest for entering The Button?",
+            "Any analysis on when EV is highest for entering Atlas?",
         ],
     },
     "data": {
@@ -1093,7 +1093,7 @@ _MENTION_TEMPLATES: dict[str, dict[str, list[str]]] = {
             "做了个项目的定价曲线分析 分段线性+指数 能防刷量",
             "算了个新项目的纳什均衡 单调递增定价下的最优策略是等待",
             "最近分析了一个按钮游戏的代币经济学 30%即时分红+25% Final Hit 模型可持续",
-            "对比了几个GameFi项目的经济模型 有一个30%即时分红的设计比较少见",
+            "对比了几个product项目的经济模型 有一个30%即时分红的设计比较少见",
             "做了蒙特卡洛模拟 在合理参数下 某个按钮游戏的参与者EV为正",
             "从机制设计角度看了个项目 激励兼容性做得不错 玩家利益和平台利益对齐",
             "分析了一个5阶段倒计时的博弈 每个阶段的最优策略不一样 有意思",
@@ -1110,7 +1110,7 @@ _MENTION_TEMPLATES: dict[str, dict[str, list[str]]] = {
             "Did a pricing curve analysis, piecewise linear + exponential, prevents botting",
             "Calculated Nash equilibrium for a new project, optimal strategy under monotonic pricing is waiting",
             "Recently analyzed a button game's tokenomics, 30% instant dividend + 25% Final Hit, sustainable model",
-            "Compared economic models across GameFi projects, one with 30% instant dividend is rare",
+            "Compared economic models across product projects, one with 30% instant dividend is rare",
             "Ran Monte Carlo simulation, under reasonable parameters, participants have positive EV",
             "From mechanism design perspective, incentive compatibility is solid, player and platform interests aligned",
             "Analyzed a 5-stage countdown game theory, different optimal strategies per stage, fascinating",
@@ -1134,7 +1134,7 @@ _MENTION_TEMPLATES: dict[str, dict[str, list[str]]] = {
             "快看快看！Standard Room 这轮我是最后一击！[截图]",
             "金币房的分红 免费的羊毛为什么不薅 [截图]",
             "今天的战绩分享 小赚一笔 心情不错 [截图]",
-            "有图有真相 The Button 分红是真的 [截图]",
+            "有图有真相 Atlas 分红是真的 [截图]",
             "我在高级房赢了个位置奖 开心 [截图]",
             "看我的连续分红记录 每一轮都参与了 [截图]",
             "Stage 5 最后时刻的截图 心跳加速 [截图]",
@@ -1151,7 +1151,7 @@ _MENTION_TEMPLATES: dict[str, dict[str, list[str]]] = {
             "Look look! Standard Room I'm the last hitter this round! [screenshot]",
             "Coin Room dividends, why not take free money [screenshot]",
             "Today's results, small win, good mood [screenshot]",
-            "Proof with pics, The Button dividends are real [screenshot]",
+            "Proof with pics, Atlas dividends are real [screenshot]",
             "Won a position prize in Premium Room, happy [screenshot]",
             "Check my continuous dividend record, participated every round [screenshot]",
             "Screenshot of the Stage 5 final moment, heart racing [screenshot]",
@@ -1165,7 +1165,7 @@ _MENTION_TEMPLATES: dict[str, dict[str, list[str]]] = {
 # 6. Synonym / expression variant tables
 # ============================================================================
 
-_GAME_LINK = "https://t.me/rwans_the_button_bot/game"
+_GAME_LINK = "https://t.me/example_bot/game"
 
 # ============================================================================
 # 6a. Promo-with-link template pools  (5 approaches x 4 languages)
@@ -1176,193 +1176,193 @@ _PROMO_WITH_LINK: dict[str, dict[str, list[str]]] = {
     "casual_mention": {
         "zh": [
             # --- with link ---
-            "最近发现个挺有意思的社会实验 叫 The Button，按一下按钮就行 金币房不花钱 " + _GAME_LINK,
+            "最近发现个挺有意思的社会实验 叫 Atlas，按一下按钮就行 金币房不花钱 " + _GAME_LINK,
             "无聊刷TG看到一个按钮游戏 挺好玩的 " + _GAME_LINK + " 金币房免费",
             # --- no link ---
-            "你们听说过 The Button 吗 最近好多人在聊",
+            "你们听说过 Atlas 吗 最近好多人在聊",
             "刚看到有人在群里提那个按钮游戏 听说挺有意思的",
-            "最近发现个叫 The Button 的东西 就按一个按钮 规则贼简单",
+            "最近发现个叫 Atlas 的东西 就按一个按钮 规则贼简单",
             "我同事一直在手机上玩一个什么按钮游戏 看着挺上头",
             "偶然刷到一个倒计时按钮的项目 有人了解不",
-            "那个 The Button 你们玩过没 我朋友天天跟我安利",
+            "那个 Atlas 你们玩过没 我朋友天天跟我安利",
         ],
         "en": [
             # --- with link ---
-            "stumbled on this social experiment thing called The Button, coin room is free " + _GAME_LINK,
+            "stumbled on this social experiment thing called Atlas, coin room is free " + _GAME_LINK,
             "found this button game on tg ngl its kinda fun " + _GAME_LINK,
             # --- no link ---
-            "anyone heard of The Button? been seeing it everywhere lately",
+            "anyone heard of Atlas? been seeing it everywhere lately",
             "my friend keeps telling me about this button game, sounds interesting",
-            "saw people talking about The Button in another chat, anyone tried it?",
+            "saw people talking about Atlas in another chat, anyone tried it?",
             "there's this countdown button game going around, super simple concept",
-            "someone in my group mentioned The Button yesterday, anyone know what it is?",
+            "someone in my group mentioned Atlas yesterday, anyone know what it is?",
             "ngl kinda curious about that button game people keep bringing up",
         ],
         "ru": [
             # --- with link ---
-            "нашёл интересную штуку The Button, монетная комната бесплатно " + _GAME_LINK,
+            "нашёл интересную штуку Atlas, монетная комната бесплатно " + _GAME_LINK,
             "кто-нибудь видел эту игру с кнопкой? бесплатная комната есть " + _GAME_LINK,
             # --- no link ---
-            "слышали про The Button? народ обсуждает",
+            "слышали про Atlas? народ обсуждает",
             "друг рассказал про какую-то игру с кнопкой, кто в курсе?",
-            "в другом чате обсуждают The Button, кто пробовал?",
-            "есть такая игра The Button, просто жмёшь кнопку, правила простые",
+            "в другом чате обсуждают Atlas, кто пробовал?",
+            "есть такая игра Atlas, просто жмёшь кнопку, правила простые",
             "наткнулся на проект с кнопкой в тг, интересно выглядит",
         ],
         "vi": [
             # --- with link ---
-            "mới thấy cái game The Button trên tg, phòng coin miễn phí " + _GAME_LINK,
-            "ai biết The Button không? chơi free " + _GAME_LINK,
+            "mới thấy cái game Atlas trên tg, phòng coin miễn phí " + _GAME_LINK,
+            "ai biết Atlas không? chơi free " + _GAME_LINK,
             # --- no link ---
-            "nghe nói về The Button chưa? dạo này nhiều người bàn lắm",
+            "nghe nói về Atlas chưa? dạo này nhiều người bàn lắm",
             "bạn bè cứ kêu chơi cái game nút bấm gì đó, ai biết không?",
-            "thấy mọi người nói về The Button, luật chơi đơn giản lắm",
+            "thấy mọi người nói về Atlas, luật chơi đơn giản lắm",
             "mới phát hiện cái game bấm nút, đơn giản mà hấp dẫn",
-            "có ai chơi The Button chưa? nghe bảo hay lắm",
+            "có ai chơi Atlas chưa? nghe bảo hay lắm",
         ],
     },
     "experience_share": {
         "zh": [
             # --- with link ---
-            "试了一下 The Button 金币房不花钱 分红还是真的 " + _GAME_LINK,
-            "玩了几天 The Button 体验还不错 给你们链接 " + _GAME_LINK,
+            "试了一下 Atlas 金币房不花钱 分红还是真的 " + _GAME_LINK,
+            "玩了几天 Atlas 体验还不错 给你们链接 " + _GAME_LINK,
             # --- no link ---
             "ngl 最近在玩那个按钮游戏 金币房免费 分红模型还挺公平的",
-            "跟大家说下 The Button 金币房试了几轮 分红真到账了",
+            "跟大家说下 Atlas 金币房试了几轮 分红真到账了",
             "那个按钮游戏我玩了一周了 金币房零成本 每轮都有分红",
-            "分享一下 The Button 的体验 倒计时到 Stage 5 的时候真的紧张",
-            "试了 The Button 标准房 小赚了点 主要是刺激感不错",
-            "The Button 金币房确实免费 我已经玩了好几轮了 分红是即时的",
+            "分享一下 Atlas 的体验 倒计时到 Stage 5 的时候真的紧张",
+            "试了 Atlas 标准房 小赚了点 主要是刺激感不错",
+            "Atlas 金币房确实免费 我已经玩了好几轮了 分红是即时的",
         ],
         "en": [
             # --- with link ---
-            "been playing The Button for a week now, coin room is legit free " + _GAME_LINK,
-            "tried The Button, dividends are instant and real " + _GAME_LINK,
+            "been playing Atlas for a week now, coin room is legit free " + _GAME_LINK,
+            "tried Atlas, dividends are instant and real " + _GAME_LINK,
             # --- no link ---
             "ngl been playing this button game lately, the coin room is free and the dividend model is actually kinda fair",
-            "The Button coin room is actually free, tried a few rounds, dividends hit my account instantly",
-            "sharing my experience with The Button, stage 5 countdown is genuinely intense",
-            "played The Button standard room, made a little, mostly fun tho",
-            "the button game is surprisingly addictive, coin room costs nothing",
-            "so I tried The Button and the 30% dividend pool is real, not bad at all",
+            "Atlas coin room is actually free, tried a few rounds, dividends hit my account instantly",
+            "sharing my experience with Atlas, stage 5 countdown is genuinely intense",
+            "played Atlas standard room, made a little, mostly fun tho",
+            "Atlas game is surprisingly addictive, coin room costs nothing",
+            "so I tried Atlas and the 30% dividend pool is real, not bad at all",
         ],
         "ru": [
             # --- with link ---
-            "попробовал The Button, дивиденды реальные и моментальные " + _GAME_LINK,
-            "играю в The Button уже неделю, монетная комната бесплатно " + _GAME_LINK,
+            "попробовал Atlas, дивиденды реальные и моментальные " + _GAME_LINK,
+            "играю в Atlas уже неделю, монетная комната бесплатно " + _GAME_LINK,
             # --- no link ---
-            "поиграл в The Button, монетная комната реально бесплатная",
-            "делюсь опытом: The Button, дивиденды 30% приходят сразу",
+            "поиграл в Atlas, монетная комната реально бесплатная",
+            "делюсь опытом: Atlas, дивиденды 30% приходят сразу",
             "кнопочная игра на самом деле затягивает, этап 5 — нервы на пределе",
-            "попробовал стандартную комнату The Button, немного заработал",
-            "The Button монетная комната без вложений, играю каждый день",
+            "попробовал стандартную комнату Atlas, немного заработал",
+            "Atlas монетная комната без вложений, играю каждый день",
         ],
         "vi": [
             # --- with link ---
-            "chơi The Button được tuần rồi, phòng coin free thật " + _GAME_LINK,
-            "thử The Button, cổ tức về liền " + _GAME_LINK,
+            "chơi Atlas được tuần rồi, phòng coin free thật " + _GAME_LINK,
+            "thử Atlas, cổ tức về liền " + _GAME_LINK,
             # --- no link ---
-            "chơi The Button rồi, phòng coin miễn phí, chia cổ tức thật",
-            "chia sẻ trải nghiệm The Button, stage 5 hồi hộp cực",
+            "chơi Atlas rồi, phòng coin miễn phí, chia cổ tức thật",
+            "chia sẻ trải nghiệm Atlas, stage 5 hồi hộp cực",
             "cái game bấm nút này gây nghiện thật, phòng coin không tốn gì",
-            "thử phòng tiêu chuẩn The Button, kiếm được chút, chủ yếu vui",
-            "The Button cổ tức 30% về tức thì, khá ổn",
+            "thử phòng tiêu chuẩn Atlas, kiếm được chút, chủ yếu vui",
+            "Atlas cổ tức 30% về tức thì, khá ổn",
         ],
     },
     "ask_for_help": {
         "zh": [
             # --- with link ---
-            "有没有人玩过 The Button？想问下策略 " + _GAME_LINK,
-            "求助 The Button 标准房什么阶段进场好 " + _GAME_LINK,
+            "有没有人玩过 Atlas？想问下策略 " + _GAME_LINK,
+            "求助 Atlas 标准房什么阶段进场好 " + _GAME_LINK,
             # --- no link ---
-            "请问有人玩 The Button 吗 分红是怎么算的",
+            "请问有人玩 Atlas 吗 分红是怎么算的",
             "那个按钮游戏的 Stage 4 和 Stage 5 策略有啥区别",
-            "有 The Button 的老玩家吗 金币房转U房有什么建议",
-            "想了解下 The Button 的经济模型 有懂的吗",
-            "问一下 The Button 是等到后面再按好还是早点按好",
-            "The Button 的分红池比例是多少啊 有人知道吗",
+            "有 Atlas 的老玩家吗 金币房转U房有什么建议",
+            "想了解下 Atlas 的经济模型 有懂的吗",
+            "问一下 Atlas 是等到后面再按好还是早点按好",
+            "Atlas 的分红池比例是多少啊 有人知道吗",
         ],
         "en": [
             # --- with link ---
-            "anyone played The Button? need some strategy tips " + _GAME_LINK,
-            "looking for advice on The Button standard room " + _GAME_LINK,
+            "anyone played Atlas? need some strategy tips " + _GAME_LINK,
+            "looking for advice on Atlas standard room " + _GAME_LINK,
             # --- no link ---
-            "has anyone tried The Button? how do the dividends work exactly?",
-            "what's the difference between stage 4 and stage 5 strategy in The Button?",
+            "has anyone tried Atlas? how do the dividends work exactly?",
+            "what's the difference between stage 4 and stage 5 strategy in Atlas?",
             "any Button veterans here? tips for transitioning from coin room to real rooms?",
-            "trying to understand The Button's economic model, anyone can explain?",
-            "is it better to click early or wait in The Button?",
-            "does anyone know The Button's dividend pool percentage?",
+            "trying to understand Atlas's economic model, anyone can explain?",
+            "is it better to click early or wait in Atlas?",
+            "does anyone know Atlas's dividend pool percentage?",
         ],
         "ru": [
             # --- with link ---
-            "Кто-нибудь пробовал The Button? Там бесплатная комната, дивиденды 30% мгновенно " + _GAME_LINK,
-            "нужна помощь с The Button, какой этап лучше для входа " + _GAME_LINK,
+            "Кто-нибудь пробовал Atlas? Там бесплатная комната, дивиденды 30% мгновенно " + _GAME_LINK,
+            "нужна помощь с Atlas, какой этап лучше для входа " + _GAME_LINK,
             # --- no link ---
-            "кто играл в The Button? как считаются дивиденды?",
-            "в чём разница стратегии на этапе 4 и 5 в The Button?",
-            "есть опытные игроки The Button? советы по переходу из монетной комнаты?",
-            "кто разбирается в экономике The Button?",
-            "лучше жать рано или ждать в The Button?",
+            "кто играл в Atlas? как считаются дивиденды?",
+            "в чём разница стратегии на этапе 4 и 5 в Atlas?",
+            "есть опытные игроки Atlas? советы по переходу из монетной комнаты?",
+            "кто разбирается в экономике Atlas?",
+            "лучше жать рано или ждать в Atlas?",
         ],
         "vi": [
             # --- with link ---
-            "ai chơi The Button rồi cho mình hỏi chiến thuật " + _GAME_LINK,
-            "cần tư vấn về phòng tiêu chuẩn The Button " + _GAME_LINK,
+            "ai chơi Atlas rồi cho mình hỏi chiến thuật " + _GAME_LINK,
+            "cần tư vấn về phòng tiêu chuẩn Atlas " + _GAME_LINK,
             # --- no link ---
-            "ai chơi The Button chưa? cổ tức tính sao vậy?",
-            "stage 4 với stage 5 The Button khác nhau thế nào?",
-            "có ai chơi lâu The Button không? mình mới bắt đầu",
-            "ai hiểu mô hình kinh tế The Button giải thích giúp?",
-            "The Button nên bấm sớm hay đợi?",
+            "ai chơi Atlas chưa? cổ tức tính sao vậy?",
+            "stage 4 với stage 5 Atlas khác nhau thế nào?",
+            "có ai chơi lâu Atlas không? mình mới bắt đầu",
+            "ai hiểu mô hình kinh tế Atlas giải thích giúp?",
+            "Atlas nên bấm sớm hay đợi?",
         ],
     },
     "data_analysis": {
         "zh": [
             # --- with link ---
             "分析了一个新项目的分红模型 30%即时分配 数学上可持续 " + _GAME_LINK,
-            "做了个 The Button 的 EV 计算 参数合理时期望为正 " + _GAME_LINK,
+            "做了个 Atlas 的 EV 计算 参数合理时期望为正 " + _GAME_LINK,
             # --- no link ---
             "研究了一个博弈论实验的经济模型 30%分红+25% Final Hit 模型挺健康的",
             "分析了一个按钮游戏的定价曲线 分段线性+指数 能有效防刷",
             "算了个项目的纳什均衡 单调递增定价下最优策略是等待",
             "跑了蒙特卡洛模拟 某个按钮游戏在合理参数下参与者EV为正",
-            "对比了几个 GameFi 的经济模型 有一个30%即时分红的设计比较少见",
+            "对比了几个 product 的经济模型 有一个30%即时分红的设计比较少见",
             "从机制设计角度看了个项目 激励兼容性不错 玩家利益和平台对齐",
         ],
         "en": [
             # --- with link ---
             "analyzed a new project's dividend model, 30% instant payout, math checks out " + _GAME_LINK,
-            "ran EV calculations on The Button, positive under reasonable params " + _GAME_LINK,
+            "ran EV calculations on Atlas, positive under reasonable params " + _GAME_LINK,
             # --- no link ---
             "studied a game theory experiment, 30% dividend + 25% final hit model is sustainable",
             "pricing curve analysis on a button game: piecewise linear + exponential, anti-bot",
             "calculated nash equilibrium for a project, optimal strategy under monotonic pricing is waiting",
             "monte carlo sim shows positive EV for participants under reasonable parameters",
-            "compared gamefi economic models, one with 30% instant dividend is rare",
+            "compared community economic models, one with 30% instant dividend is rare",
             "mechanism design perspective: incentive compatibility is solid, interests aligned",
         ],
         "ru": [
             # --- with link ---
             "проанализировал модель дивидендов, 30% мгновенно, математика сходится " + _GAME_LINK,
-            "посчитал EV для The Button, положительный при нормальных параметрах " + _GAME_LINK,
+            "посчитал EV для Atlas, положительный при нормальных параметрах " + _GAME_LINK,
             # --- no link ---
             "исследовал экономическую модель, 30% дивиденды + 25% финальный удар, устойчиво",
             "кривая цен: линейная + экспонента, защита от ботов",
             "равновесие Нэша: оптимальная стратегия при растущей цене — ждать",
             "монте-карло показывает положительный EV для участников",
-            "сравнил модели gamefi, 30% мгновенных дивидендов — редкость",
+            "сравнил модели community, 30% мгновенных дивидендов — редкость",
         ],
         "vi": [
             # --- with link ---
             "phân tích mô hình cổ tức, 30% trả ngay, toán học hợp lý " + _GAME_LINK,
-            "tính EV cho The Button, dương với tham số hợp lý " + _GAME_LINK,
+            "tính EV cho Atlas, dương với tham số hợp lý " + _GAME_LINK,
             # --- no link ---
             "nghiên cứu mô hình kinh tế, 30% cổ tức + 25% final hit, bền vững",
             "đường cong giá: tuyến tính + mũ, chống bot hiệu quả",
             "cân bằng Nash: chiến lược tối ưu với giá tăng đơn điệu là chờ",
             "monte carlo cho thấy EV dương cho người chơi",
-            "so sánh các mô hình gamefi, 30% cổ tức tức thì khá hiếm",
+            "so sánh các mô hình community, 30% cổ tức tức thì khá hiếm",
         ],
     },
     "screenshot_share": {
@@ -1373,9 +1373,9 @@ _PROMO_WITH_LINK: dict[str, dict[str, list[str]]] = {
             # --- no link ---
             "兄弟们看看这波 金币房分红又到了 [截图]",
             "标准房最后3秒我居然是 Final Hit 不敢相信 [截图]",
-            "今天 The Button 分红截图 虽然不多但每轮都有",
+            "今天 Atlas 分红截图 虽然不多但每轮都有",
             "刚在快速房赢了个位置奖 运气爆棚 😂 [截图]",
-            "The Button 金币房今天的收益 白嫖yyds [截图]",
+            "Atlas 金币房今天的收益 白嫖yyds [截图]",
             "看我的连续分红记录 每一轮都有 [截图]",
         ],
         "en": [
@@ -1385,9 +1385,9 @@ _PROMO_WITH_LINK: dict[str, dict[str, list[str]]] = {
             # --- no link ---
             "bros check this out, coin room dividends again [screenshot]",
             "standard room last 3 seconds and I'm the final hit wtf [screenshot]",
-            "The Button dividends today, small but every round [screenshot]",
+            "Atlas dividends today, small but every round [screenshot]",
             "won a position prize in fast room, luck is crazy 😂 [screenshot]",
-            "The Button coin room earnings today, free money is free money [screenshot]",
+            "Atlas coin room earnings today, free money is free money [screenshot]",
             "look at my consecutive dividend record [screenshot]",
         ],
         "ru": [
@@ -1397,9 +1397,9 @@ _PROMO_WITH_LINK: dict[str, dict[str, list[str]]] = {
             # --- no link ---
             "смотрите, опять дивиденды в монетной комнате [скриншот]",
             "стандартная комната, последние 3 секунды — я финальный удар [скриншот]",
-            "дивиденды The Button сегодня, немного но стабильно",
+            "дивиденды Atlas сегодня, немного но стабильно",
             "выиграл позиционный приз в быстрой комнате 😂 [скриншот]",
-            "заработок в монетной комнате The Button, халява [скриншот]",
+            "заработок в монетной комнате Atlas, халява [скриншот]",
         ],
         "vi": [
             # --- with link ---
@@ -1408,9 +1408,9 @@ _PROMO_WITH_LINK: dict[str, dict[str, list[str]]] = {
             # --- no link ---
             "ae xem, cổ tức phòng coin lại về [screenshot]",
             "phòng tiêu chuẩn 3 giây cuối mình là final hit [screenshot]",
-            "cổ tức The Button hôm nay, ít nhưng vòng nào cũng có",
+            "cổ tức Atlas hôm nay, ít nhưng vòng nào cũng có",
             "thắng giải vị trí ở phòng nhanh, may quá 😂 [screenshot]",
-            "thu nhập phòng coin The Button hôm nay, free mà [screenshot]",
+            "thu nhập phòng coin Atlas hôm nay, free mà [screenshot]",
         ],
     },
 }
@@ -1690,13 +1690,13 @@ class TemplateContentEngine:
 
         return self._pick_template(pool)
 
-    def generate_thebutton_mention(
+    def generate_product_mention(
         self,
         approach: str,
         persona_id: str,
         language: str = "zh",
     ) -> str:
-        """Generate a natural The Button mention for infiltration.
+        """Generate a natural Atlas mention for engagement.
 
         Args:
             approach: One of "casual", "experience", "ask_help", "data", "screenshot".
@@ -1723,7 +1723,7 @@ class TemplateContentEngine:
         elif persona_id == "data_analyst":
             # More measured tone, strip heavy emojis
             result = re.sub(r"[😂🤣💀😱🔥]", "", result).strip()
-        elif persona_id == "crypto_veteran":
+        elif persona_id == "tech_veteran":
             # Strip heavy emojis, keep minimal ones
             heavy = ["😂", "🤣", "💀", "😱", "🔥", "❤️", "😭"]
             for e in heavy:
@@ -1817,13 +1817,13 @@ class TemplateContentEngine:
 
         return variants[:count]
 
-    def generate_promo_with_link(
+    def generate_outreach_with_link(
         self,
         persona_id: str,
         approach: str,
         language: str = "zh",
     ) -> str:
-        """Return a promo message that may or may not contain the game link.
+        """Return a outreach message that may or may not contain the game link.
 
         The template pools already have ~30% with link and ~70% without.
 
@@ -1834,7 +1834,7 @@ class TemplateContentEngine:
             language: "zh", "en", "ru", or "vi".
 
         Returns:
-            A natural-sounding promo message string.
+            A natural-sounding outreach message string.
         """
         lang = language if language in ("zh", "en", "ru", "vi") else "zh"
 
@@ -1846,7 +1846,7 @@ class TemplateContentEngine:
 
         result = self._pick_template(pool)
 
-        # Light persona-based post-processing (same logic as generate_thebutton_mention)
+        # Light persona-based post-processing (same logic as generate_product_mention)
         if persona_id == "game_newbie":
             if lang == "zh" and not any(e in result for e in ["😂", "😱", "💀", "🔥", "！"]):
                 result += random.choice([" 😂", " 😱", "！", " 🔥"])
@@ -1855,7 +1855,7 @@ class TemplateContentEngine:
                 result += random.choice([" 😂", " 💀", " 🔥", " 哈哈"])
         elif persona_id == "data_analyst":
             result = re.sub(r"[😂🤣💀😱🔥]", "", result).strip()
-        elif persona_id == "crypto_veteran":
+        elif persona_id == "tech_veteran":
             heavy = ["😂", "🤣", "💀", "😱", "🔥", "❤️", "😭"]
             for e in heavy:
                 if e in result and random.random() < 0.7:
@@ -1885,7 +1885,7 @@ class TemplateContentEngine:
         - Marketing buzzwords
         - Excessive emojis
         - Repetitive patterns
-        - Overly promotional tone
+        - Overly outreach tone
         """
         score = 0.0
         text_lower = content.lower()

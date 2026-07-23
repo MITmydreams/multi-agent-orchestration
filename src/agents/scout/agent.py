@@ -1,7 +1,7 @@
-"""Layer 1 -- Scout Agent: intelligence gathering, zero promotion.
+"""Layer 1 -- Scout Agent: intelligence gathering, zero outreach.
 
 The scout joins groups, observes, analyses, and records.  It never sends
-promotional messages or links.  Its sole purpose is to discover and evaluate
+outreach messages or links.  Its sole purpose is to discover and evaluate
 target groups for downstream agents.
 """
 
@@ -30,14 +30,14 @@ logger = structlog.get_logger(__name__)
 SEARCH_KEYWORDS_TIERED: dict[str, dict[str, list[str]]] = {
     "high": {
         "en": [
-            "airdrop hunter", "airdrop farming", "airdrop alpha", "retroactive airdrop",
-            "tap to earn", "telegram tap game", "telegram mini app game",
-            "ton game", "ton tap", "play to airdrop",
-            "gamefi guild", "web3 game testers", "crypto game beta",
-            "clicker crypto", "telegram clicker",
-            "crypto chat group", "web3 community chat", "airdrop discussion", "ton chat", "gamefi chat",
-            "usdt earning group", "crypto earning chat", "play to earn community",
-            "web3 game players", "telegram game earning",
+            "announcement hunter", "announcement farming", "announcement alpha", "retroactive announcement",
+            "referral programs", "telegram tap game", "telegram mini app game",
+            "ton game", "ton tap", "play to announcement",
+            "community guild", "community product testers", "tech game beta",
+            "clicker tech", "telegram clicker",
+            "tech chat group", "community community chat", "announcement discussion", "ton chat", "community chat",
+            "usdt earning group", "tech earning chat", "play to earn community",
+            "community product players", "telegram game earning",
             # Specific projects (high signal — people in these groups are our exact target)
             "hamster kombat chat", "pixelverse community", "catizen chat",
             "blum community", "notcoin chat", "yescoin community",
@@ -45,7 +45,7 @@ SEARCH_KEYWORDS_TIERED: dict[str, dict[str, list[str]]] = {
             "moonbix chat", "tomarket community", "rocky rabbit chat",
             "vertus community", "dotcoin chat", "seed app community",
             # Exchange / wallet ecosystem
-            "binance web3 wallet", "okx web3 chat", "bybit web3",
+            "binance community wallet", "okx community chat", "bybit community",
             "trust wallet community", "metamask community",
             "tonkeeper chat", "tonhub community",
         ],
@@ -54,7 +54,7 @@ SEARCH_KEYWORDS_TIERED: dict[str, dict[str, list[str]]] = {
         "ru": [
             "аирдроп охотник", "фарм аирдропов", "бесплатные аирдропы",
             "telegram кликер", "тап ту ерн", "крипто игры",
-            "ton игры", "airdrop россия", "ретродроп",
+            "ton игры", "announcement россия", "ретродроп",
             "p2e игры", "веб3 игры",
             "крипто чат", "аирдроп чат", "обсуждение крипто",
             "заработок usdt", "крипто заработок чат", "играй и зарабатывай",
@@ -63,57 +63,57 @@ SEARCH_KEYWORDS_TIERED: dict[str, dict[str, list[str]]] = {
             "catizen россия", "dogs токен чат",
         ],
         "vi": [
-            "săn airdrop", "kèo airdrop", "airdrop miễn phí",
-            "game web3", "game kiếm tiền", "tap to earn việt nam",
+            "săn announcement", "kèo announcement", "announcement miễn phí",
+            "game community", "game kiếm tiền", "referral programs việt nam",
             "ton game việt", "chơi game kiếm coin", "retroactive vietnam",
-            "cày airdrop", "game nft kiếm tiền",
-            "nhóm chat crypto", "thảo luận airdrop", "cộng đồng web3 chat",
-            "kiếm usdt", "nhóm kiếm tiền crypto", "chơi game kiếm usdt",
+            "cày announcement", "game nft kiếm tiền",
+            "nhóm chat tech", "thảo luận announcement", "cộng đồng community chat",
+            "kiếm usdt", "nhóm kiếm tiền tech", "chơi game kiếm usdt",
             # Project-specific
             "hamster kombat việt", "notcoin việt nam", "blum việt nam",
         ],
         "id": [
-            "airdrop indonesia", "pemburu airdrop", "airdrop gratis",
-            "game kripto", "tap to earn indo", "game penghasil crypto",
-            "game ton indonesia", "main game dapat crypto",
-            "garap airdrop", "game web3 indo", "retroactive airdrop indo",
+            "announcement indonesia", "pemburu announcement", "announcement gratis",
+            "game kripto", "referral programs indo", "game penghasil tech",
+            "game ton indonesia", "main game dapat tech",
+            "garap announcement", "game community indo", "retroactive announcement indo",
             # Project-specific
             "hamster kombat indo", "notcoin indonesia", "blum indonesia",
         ],
         # New languages
         "tr": [
-            "airdrop türkiye", "kripto oyun", "telegram oyun",
-            "ton oyun türkiye", "ücretsiz airdrop", "kripto kazanç",
-            "tap to earn türkiye", "web3 oyun türkçe", "airdrop avı",
+            "announcement türkiye", "kripto oyun", "telegram oyun",
+            "ton oyun türkiye", "ücretsiz announcement", "kripto kazanç",
+            "referral programs türkiye", "community oyun türkçe", "announcement avı",
             "kripto sohbet", "play to earn türkiye",
         ],
         "pt": [
-            "airdrop brasil", "jogo crypto", "telegram game brasil",
-            "ton game brasil", "ganhar crypto grátis", "caçador de airdrop",
-            "tap to earn brasil", "web3 jogo", "comunidade crypto brasil",
-            "gamefi brasil", "play to earn brasil",
+            "announcement brasil", "jogo tech", "telegram game brasil",
+            "ton game brasil", "ganhar tech grátis", "caçador de announcement",
+            "referral programs brasil", "community jogo", "comunidade tech brasil",
+            "community brasil", "play to earn brasil",
         ],
     },
     "medium": {
         "en": [
-            "ton ecosystem", "ton builders", "web3 gaming", "gamefi",
-            "crypto quests", "zealy questers", "galxe quest",
-            "testnet farmers", "on-chain gaming", "layerzero farming",
+            "ton ecosystem", "ton builders", "community gaming", "community",
+            "tech quests", "zealy questers", "galxe quest",
+            "testnet farmers", "analytics gaming", "layerzero farming",
             "zksync farming", "linea farming", "monad testnet",
-            "degens lounge", "alpha calls web3",
-            "defi yield chat", "crypto passive income", "staking community chat",
+            "degens lounge", "alpha calls community",
+            "saas yield chat", "tech passive income", "staking community chat",
             # Chain ecosystems
-            "solana airdrop", "sui community", "aptos chat",
+            "solana announcement", "sui community", "aptos chat",
             "sei network community", "scroll community", "blast community",
             "starknet chat", "mantle community", "manta network chat",
             "berachain community", "celestia chat",
-            # Broader crypto gaming
-            "idle game crypto", "casual game blockchain", "social game web3",
-            "prediction market crypto", "betting crypto community",
+            # Broader tech gaming
+            "idle game tech", "casual game blockchain", "social game community",
+            "prediction market tech", "betting tech community",
         ],
         "zh": [],  # Chinese groups excluded by user policy
         "ru": [
-            "крипто тестнет", "web3 геймеры", "крипто квесты",
+            "крипто тестнет", "community геймеры", "крипто квесты",
             "galxe задания", "zealy", "layer2 фарм",
             "альфа крипто", "дегены", "ранние проекты",
             "ton экосистема", "крипто задания",
@@ -121,61 +121,61 @@ SEARCH_KEYWORDS_TIERED: dict[str, dict[str, list[str]]] = {
         ],
         "vi": [
             "hệ sinh thái ton", "testnet vietnam", "layer2 farming",
-            "galxe việt", "zealy task", "alpha crypto việt",
-            "dự án sớm", "nhiệm vụ crypto", "degen vietnam",
-            "web3 vietnam",
+            "galxe việt", "zealy task", "alpha tech việt",
+            "dự án sớm", "nhiệm vụ tech", "degen vietnam",
+            "community vietnam",
             "solana việt nam", "sui việt nam",
         ],
         "id": [
             "testnet indo", "layer2 farming indo", "galxe indonesia",
-            "zealy indo", "alpha crypto indonesia", "ekosistem ton",
-            "degen indo", "quest crypto", "proyek awal crypto",
-            "web3 indonesia",
+            "zealy indo", "alpha tech indonesia", "ekosistem ton",
+            "degen indo", "quest tech", "proyek awal tech",
+            "community indonesia",
             "solana indonesia", "sui indonesia",
         ],
         "tr": [
-            "kripto testnet türkiye", "web3 oyuncu türkiye",
+            "kripto testnet türkiye", "community oyuncu türkiye",
             "galxe türkiye", "zealy türkiye", "layer2 türkiye",
             "solana türkiye", "ton ekosistem türkiye",
         ],
         "pt": [
-            "testnet brasil", "web3 gamers brasil",
+            "testnet brasil", "community productrs brasil",
             "galxe brasil", "zealy brasil", "layer2 brasil",
             "solana brasil", "ton ecosistema brasil",
         ],
     },
     "low": {
         "en": [
-            "web3 community", "crypto beta tester", "blockchain gamers",
-            "crypto newbie", "defi starter", "metaverse players",
+            "community community", "tech beta tester", "blockchain gamers",
+            "tech newbie", "saas starter", "metaverse players",
             "evm farming", "polygon zkEVM", "base ecosystem", "arbitrum community",
-            "nft trading group", "crypto signals free", "defi traders chat",
-            "web3 builders", "crypto developers chat",
+            "nft trading group", "tech signals free", "saas traders chat",
+            "community builders", "tech developers chat",
         ],
         "zh": [],  # Chinese groups excluded by user policy
         "ru": [
-            "крипто новичок", "web3 сообщество", "блокчейн игры",
+            "крипто новичок", "community сообщество", "блокчейн игры",
             "arbitrum ru", "base ru", "zksync ru", "метавселенная",
-            "defi новичок", "крипто игроки", "evm фарм",
+            "saas новичок", "крипто игроки", "evm фарм",
         ],
         "vi": [
-            "crypto newbie việt", "cộng đồng web3", "arbitrum việt",
+            "tech newbie việt", "cộng đồng community", "arbitrum việt",
             "base việt", "zksync việt", "metaverse việt",
-            "người chơi blockchain", "defi cơ bản", "evm farming",
-            "crypto cho người mới",
+            "người chơi blockchain", "saas cơ bản", "evm farming",
+            "tech cho người mới",
         ],
         "id": [
-            "crypto pemula", "komunitas web3 indo", "arbitrum indo",
+            "tech pemula", "komunitas community indo", "arbitrum indo",
             "base indo", "zksync indo", "metaverse indo",
-            "pemain blockchain", "defi pemula", "evm farming",
-            "crypto untuk pemula",
+            "pemain blockchain", "saas pemula", "evm farming",
+            "tech untuk pemula",
         ],
         "tr": [
-            "kripto yeni başlayan", "web3 topluluk türkiye",
+            "kripto yeni başlayan", "community topluluk türkiye",
             "arbitrum türkiye", "base türkiye", "blockchain oyuncular",
         ],
         "pt": [
-            "crypto iniciante", "comunidade web3 brasil",
+            "tech iniciante", "comunidade community brasil",
             "arbitrum brasil", "base brasil", "jogadores blockchain",
         ],
     },
@@ -190,7 +190,7 @@ NEGATIVE_KEYWORDS: list[str] = [
     "中文", "chinese", "华人", "华语", "汉语", "简中", "繁中",
     "中国", "大陆", "台湾", "香港",
     # Chinese content words (groups with Chinese titles)
-    "链游", "公会", "交流群", "加密玩家", "发财", "探长",
+    "社区", "公会", "交流群", "行业玩家", "发财", "探长",
     "空投社区", "频道", "招聘", "求助", "加速器",
     "德州扑克", "返usdt", "副业",
 ]
@@ -214,8 +214,8 @@ class ScoutAgent(BaseAgent):
     - Assess anti-spam severity
 
     Rules:
-    - NEVER send promotional content
-    - NEVER interact with infiltrator accounts
+    - NEVER send outreach content
+    - NEVER interact with executor accounts
     - Only join groups, read messages, and record findings
     """
 
@@ -550,9 +550,9 @@ class ScoutAgent(BaseAgent):
 
     def _score_topic_relevance(self, messages: list[dict], group_info: dict) -> float:
         relevant_terms = {
-            "crypto", "web3", "defi", "nft", "airdrop", "blockchain", "token",
+            "tech", "community", "saas", "nft", "announcement", "blockchain", "token",
             "game", "play", "earn", "ton", "telegram", "mini app",
-            "加密", "空投", "链游", "区块链", "代币", "游戏",
+            "行业", "空投", "社区", "区块链", "代币", "游戏",
         }
         text_blob = f"{(group_info.get('title') or '').lower()} {(group_info.get('description') or '').lower()}"
         for msg in messages[:50]:
@@ -561,7 +561,7 @@ class ScoutAgent(BaseAgent):
         return min(100.0, hits * 8.0)
 
     def _score_admin_leniency(self, messages: list[dict], group_info: dict) -> float:
-        """Higher score = more lenient admins (better for infiltration)."""
+        """Higher score = more lenient admins (better for engagement)."""
         deletion_count = sum(1 for m in messages if m.get("is_deleted"))
         admin_actions = sum(1 for m in messages if m.get("is_admin_action"))
         total = len(messages) or 1
@@ -585,12 +585,12 @@ class ScoutAgent(BaseAgent):
 
     def _extract_topics(self, messages: list[dict], group_info: dict) -> list[str]:
         topic_keywords = {
-            "defi": ["defi", "swap", "liquidity", "yield"],
+            "saas": ["saas", "swap", "liquidity", "yield"],
             "trading": ["trading", "chart", "bull", "bear", "long", "short"],
-            "gaming": ["game", "play", "gaming", "p2e", "链游"],
-            "airdrop": ["airdrop", "空投", "撸毛", "farming"],
+            "gaming": ["game", "play", "gaming", "p2e", "社区"],
+            "announcement": ["announcement", "空投", "撸毛", "farming"],
             "nft": ["nft", "mint", "opensea", "collection"],
-            "general": ["crypto", "加密", "blockchain", "区块链"],
+            "general": ["tech", "行业", "blockchain", "区块链"],
         }
         text_blob = f"{(group_info.get('title') or '').lower()} {(group_info.get('description') or '').lower()}"
         for msg in messages[:100]:

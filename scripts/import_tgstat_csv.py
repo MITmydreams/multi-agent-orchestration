@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-从 tgstat CSV 文件导入群组数据到 promo-bot 数据库
+从 tgstat CSV 文件导入群组数据到 ops-orchestrator 数据库
 用法: PYTHONPATH=. .venv/bin/python scripts/import_tgstat_csv.py <csv_path>
 """
 import asyncio
@@ -14,7 +14,7 @@ import json
 import asyncpg
 
 
-DB_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot")
+DB_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator")
 # asyncpg doesn't understand the +asyncpg part
 DB_URL = DB_URL.replace("postgresql+asyncpg://", "postgresql://")
 

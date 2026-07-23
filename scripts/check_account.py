@@ -4,7 +4,7 @@ Connects through the assigned proxy, verifies the account is not restricted,
 and lists joined groups.
 
 Usage:
-    cd /Users/hermit/Desktop/RWANS/Rwans_op/RWANS_TG_OP/promo-bot
+    cd /Users/hermit/Desktop/OPS/Rwans_op/OPS_TG_OP/ops-orchestrator
     source .venv/bin/activate
     PYTHONPATH=. python scripts/check_account.py
 """

@@ -178,7 +178,7 @@ class ContentSeederAgent(BaseAgent):
         return variants
 
     async def generate_meme(self, topic: str) -> str:
-        """Generate a meme / joke about The Button or crypto culture."""
+        """Generate a meme / joke about Atlas or online community culture."""
         try:
             lang = random.choice(self.LANGUAGES)
             content = await self.content_gen.generate_meme(
@@ -343,7 +343,7 @@ class ContentSeederAgent(BaseAgent):
         meme_topics = [
             "countdown anxiety", "last-second click", "dividend day",
             "whale spotted", "Stage 5 panic", "coin room grind",
-            "button addiction", "crypto degen life",
+            "button addiction", "tech degen life",
         ]
         meme = await self.generate_meme(random.choice(meme_topics))
         if meme:

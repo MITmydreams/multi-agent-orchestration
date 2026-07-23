@@ -266,7 +266,7 @@ html, body {
   background: var(--text-dim);
   transition: background .2s;
 }
-.agent-card.role-infiltrator::after { background: var(--danger); box-shadow: 0 0 12px var(--danger); }
+.agent-card.role-executor::after { background: var(--danger); box-shadow: 0 0 12px var(--danger); }
 .agent-card.role-scout::after       { background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
 .agent-card.role-content::after     { background: var(--purple); box-shadow: 0 0 12px var(--purple); }
 .agent-card.role-backup::after      { background: var(--text-mute); }
@@ -287,7 +287,7 @@ html, body {
   color: var(--text); flex-shrink: 0;
   position: relative;
 }
-.avatar.role-infiltrator { background: linear-gradient(135deg, #3a1320, #5a1c30); color: #ffb0c1; border-color: rgba(255, 51, 102, 0.4); }
+.avatar.role-executor { background: linear-gradient(135deg, #3a1320, #5a1c30); color: #ffb0c1; border-color: rgba(255, 51, 102, 0.4); }
 .avatar.role-scout       { background: linear-gradient(135deg, #0e2c3a, #134358); color: #9fe9ff; border-color: rgba(0, 212, 255, 0.4); }
 .avatar.role-content     { background: linear-gradient(135deg, #2a1340, #3d1a5c); color: #d6b0ff; border-color: rgba(180, 108, 255, 0.4); }
 .avatar.role-backup      { background: linear-gradient(135deg, #1a1f30, #252b40); color: #a8b0c0; }
@@ -311,7 +311,7 @@ html, body {
   border-radius: 4px; text-transform: uppercase;
   margin-top: 8px;
 }
-.role-infiltrator { background: rgba(255, 51, 102, 0.12); color: #ff8aa3; border: 1px solid rgba(255, 51, 102, 0.3); }
+.role-executor { background: rgba(255, 51, 102, 0.12); color: #ff8aa3; border: 1px solid rgba(255, 51, 102, 0.3); }
 .role-scout       { background: rgba(0, 212, 255, 0.12); color: #7fdfff; border: 1px solid rgba(0, 212, 255, 0.3); }
 .role-content     { background: rgba(180, 108, 255, 0.12); color: #cfa3ff; border: 1px solid rgba(180, 108, 255, 0.3); }
 .role-backup      { background: rgba(122, 130, 148, 0.12); color: #a8b0c0; border: 1px solid rgba(122, 130, 148, 0.3); }

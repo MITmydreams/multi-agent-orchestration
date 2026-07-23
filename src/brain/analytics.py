@@ -1,7 +1,7 @@
 """Analytics - Daily metrics collection, account health summaries, and reports.
 
 Queries the PostgreSQL database (via SQLAlchemy async) and Redis to produce
-actionable insights for the promo-bot operations team.
+actionable insights for the ops-orchestrator operations team.
 """
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ class PerformanceSummary(BaseModel):
 
     label: str
     total_messages: int = 0
-    promo_messages: int = 0
+    outreach_messages: int = 0
     engagement_score: float = 0.0
     conversion_events: int = 0
 
@@ -57,7 +57,7 @@ class WeeklyReportData(BaseModel):
     period_start: date
     period_end: date
     total_messages_sent: int = 0
-    total_promo_messages: int = 0
+    total_outreach_messages: int = 0
     avg_daily_ban_rate: float = 0.0
     avg_daily_risk_score: float = 0.0
     best_persona: str = "unknown"
@@ -124,10 +124,10 @@ class Analytics:
         messages_sent = await self._scalar(
             select(func.coalesce(func.sum(Account.messages_sent_today), 0)),
         )
-        promo_messages = await self._scalar(
-            select(func.coalesce(func.sum(Account.promo_messages_today), 0)),
+        outreach_messages = await self._scalar(
+            select(func.coalesce(func.sum(Account.outreach_messages_today), 0)),
         )
-        promo_ratio = promo_messages / messages_sent if messages_sent > 0 else 0.0
+        outreach_ratio = outreach_messages / messages_sent if messages_sent > 0 else 0.0
 
         # --- Risk ---
         avg_risk = await self._scalar(
@@ -159,10 +159,10 @@ class Analytics:
             ban_rate=round(ban_rate, 4),
             active_groups=active_groups or 0,
             messages_sent=messages_sent or 0,
-            promo_messages=promo_messages or 0,
-            promo_ratio=round(promo_ratio, 4),
+            outreach_messages=outreach_messages or 0,
+            outreach_ratio=round(outreach_ratio, 4),
             new_registrations=0,  # populated externally
-            registrations_from_infiltration=0,
+            registrations_from_engagement=0,
             registrations_from_bot=0,
             registrations_from_channel=0,
             daily_reach=messages_sent or 0,
@@ -214,7 +214,7 @@ class Analytics:
     async def get_best_performing_group_type(self, days: int = 7) -> str:
         """Return the group grade (S/A/B/C) with best promo-to-kick ratio.
 
-        A group type is "good" if it yields many promo messages without
+        A group type is "good" if it yields many outreach messages without
         getting accounts kicked.
         """
         since = datetime.utcnow() - timedelta(days=days)
@@ -222,7 +222,7 @@ class Analytics:
         stmt = (
             select(
                 Group.grade,
-                func.sum(GroupAccount.promo_count).label("promos"),
+                func.sum(GroupAccount.outreach_count).label("promos"),
                 func.count(GroupAccount.account_id).label("accounts"),
             )
             .join(GroupAccount, Group.id == GroupAccount.group_id)
@@ -231,7 +231,7 @@ class Analytics:
                 GroupAccount.last_message_at >= since,
             )
             .group_by(Group.grade)
-            .order_by(func.sum(GroupAccount.promo_count).desc())
+            .order_by(func.sum(GroupAccount.outreach_count).desc())
             .limit(1)
         )
 
@@ -310,7 +310,7 @@ class Analytics:
             rows: list[DailyMetrics] = list(result.scalars().all())
 
         total_msgs = sum(r.messages_sent for r in rows)
-        total_promo = sum(r.promo_messages for r in rows)
+        total_promo = sum(r.outreach_messages for r in rows)
         total_banned = sum(r.banned_accounts for r in rows)
         avg_ban_rate = (
             sum(r.ban_rate for r in rows) / len(rows) if rows else 0.0
@@ -340,8 +340,8 @@ class Analytics:
             "",
             "--- Messaging ---",
             f"  Total messages:      {total_msgs:,}",
-            f"  Promo messages:      {total_promo:,}",
-            f"  Promo ratio:         {total_promo / total_msgs * 100:.1f}%" if total_msgs > 0 else "  Promo ratio:         N/A",
+            f"  Outreach messages:      {total_promo:,}",
+            f"  Outreach ratio:         {total_promo / total_msgs * 100:.1f}%" if total_msgs > 0 else "  Outreach ratio:         N/A",
             "",
             "--- Risk ---",
             f"  Avg daily ban rate:  {avg_ban_rate * 100:.2f}%",
@@ -362,7 +362,7 @@ class Analytics:
         if health.high_risk_count > health.active_accounts * 0.2:
             report_lines.append("  [!] >20% of active accounts are high-risk. Hibernate or rotate.")
         if total_promo > 0 and total_msgs > 0 and total_promo / total_msgs > 0.25:
-            report_lines.append("  [!] Promo ratio > 25%. Increase organic content generation.")
+            report_lines.append("  [!] Outreach ratio > 25%. Increase organic content generation.")
         if avg_ban_rate <= 0.02 and health.high_risk_count == 0:
             report_lines.append("  [OK] Fleet is healthy. Consider scaling up account activations.")
 
@@ -379,7 +379,7 @@ class Analytics:
             update(Account)
             .values(
                 messages_sent_today=0,
-                promo_messages_today=0,
+                outreach_messages_today=0,
                 groups_active_today=0,
                 new_groups_today=0,
                 dms_initiated_today=0,

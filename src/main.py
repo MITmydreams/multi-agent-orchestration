@@ -1,4 +1,4 @@
-"""The Button - Telegram AI Agent Promotion System.
+"""Atlas - Multi-Account Messaging Orchestrator.
 
 Application entry point.  Initialises all components, starts the
 CentralBrain scheduler and OfficialBot in parallel, and waits for a
@@ -29,9 +29,9 @@ from src.brain.scheduler import CentralBrain
 
 # Agents
 from src.agents.scout.agent import ScoutAgent
-from src.agents.infiltrator.agent import InfiltratorAgent
+from src.agents.executor.agent import ExecutorAgent
 from src.agents.content.agent import ContentSeederAgent
-from src.agents.viral.agent import ViralEngineAgent
+from src.agents.events.agent import EventAgent
 from src.agents.bot.official_bot import OfficialBot
 
 # Telegram
@@ -96,7 +96,7 @@ def _configure_logging() -> None:
     try:
         log_dir.mkdir(parents=True, exist_ok=True)
         file_handler = RotatingFileHandler(
-            log_dir / "promo-bot.jsonl",
+            log_dir / "ops-orchestrator.jsonl",
             maxBytes=50 * 1024 * 1024,
             backupCount=5,
             encoding="utf-8",
@@ -299,7 +299,7 @@ async def main() -> None:
             risk_engine=risk_engine,
             circuit_breaker=circuit_breaker,
         )
-        infiltrator = InfiltratorAgent(
+        executor = ExecutorAgent(
             user_client=user_client,
             risk_engine=risk_engine,
             circuit_breaker=circuit_breaker,
@@ -313,7 +313,7 @@ async def main() -> None:
             circuit_breaker=circuit_breaker,
             content_gen=content_gen,
         )
-        viral_engine = ViralEngineAgent(
+        event_agent = EventAgent(
             user_client=user_client,
             risk_engine=risk_engine,
             circuit_breaker=circuit_breaker,
@@ -328,9 +328,9 @@ async def main() -> None:
             circuit_breaker=circuit_breaker,
             analytics=analytics,
             scout=scout,
-            infiltrator=infiltrator,
+            executor=executor,
             content_seeder=content_seeder,
-            viral_engine=viral_engine,
+            event_agent=event_agent,
             user_client=user_client,
         )
 

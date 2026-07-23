@@ -232,7 +232,7 @@ class ContentGenerator:
             f"请以你的人设，写一条自然的群聊回复。要求：\n"
             f"- 只写回复内容本身，不要加引号或前缀\n"
             f"- 控制在1-3句话，像真人打字一样\n"
-            f"- 根据上下文决定是否提到 The Button（大部分时候不需要提）\n"
+            f"- 根据上下文决定是否提到 Atlas（大部分时候不需要提）\n"
             f"- 如果最近消息里有人@你或问你问题，优先回答\n"
         )
 
@@ -288,9 +288,9 @@ class ContentGenerator:
         language: str = "en",
     ) -> str:
         system = (
-            "你要模拟一个刚在 The Button 游戏中获奖的玩家，在群里分享自己的经历。\n"
+            "你要模拟一个刚在 Atlas 游戏中获奖的玩家，在群里分享自己的经历。\n"
             "写得自然、口语化，像真人在群里激动地分享。\n"
-            "不要太夸张，但可以表达惊喜。不要包含任何链接或推广内容。\n"
+            "不要太夸张，但可以表达惊喜。不要包含任何链接或触达内容。\n"
             f"Language: English (always reply in English, never Chinese)"
         )
 
@@ -365,17 +365,17 @@ class ContentGenerator:
         self,
         persona: PersonaTemplate,
         group_context: str,
-        is_promo: bool = False,
+        is_outreach: bool = False,
     ) -> str:
-        """Generate a contextual group-chat response for use by the InfiltratorAgent."""
+        """Generate a contextual group-chat response for use by the ExecutorAgent."""
         if self._mode == "template":
             slog.debug("content_gen.template_mode", method="generate_response")
-            context_desc = "Group discussion" + (" (include a subtle mention of The Button)" if is_promo else "")
+            context_desc = "Group discussion" + (" (include a subtle mention of Atlas)" if is_outreach else "")
             lang = persona.languages[0] if persona.languages else "zh"
             return self._template.generate_chat_response(persona.id, context_desc, lang)
 
         recent_lines = [line.strip() for line in group_context.split("\n") if line.strip()]
-        context_desc = "Group discussion" + (" (include a subtle mention of The Button)" if is_promo else "")
+        context_desc = "Group discussion" + (" (include a subtle mention of Atlas)" if is_outreach else "")
         return await self.generate_chat_response(
             persona=persona,
             context=context_desc,
@@ -383,34 +383,34 @@ class ContentGenerator:
             language=persona.languages[0] if persona.languages else "zh",
         )
 
-    async def generate_promo(
+    async def generate_outreach(
         self,
         persona: PersonaTemplate,
         approach: str,
         group_id: str,
     ) -> str:
-        """Generate a soft promotional message using a specific approach."""
+        """Generate a soft outreach message using a specific approach."""
         if self._mode == "template":
-            slog.debug("content_gen.template_mode", method="generate_promo")
+            slog.debug("content_gen.template_mode", method="generate_outreach")
             lang = persona.languages[0] if persona.languages else "zh"
-            return self._template.generate_promo(persona.id, approach, lang)
+            return self._template.generate_outreach(persona.id, approach, lang)
 
         few_shot = self._build_few_shot_block(persona)
-        game_link = settings.game_miniapp_url
+        game_link = settings.product_app_url
         system = (
             f"{persona.system_prompt}\n\n{few_shot}\n\n"
-            "你现在需要自然地提到 The Button 游戏。\n"
+            "你现在需要自然地提到 Atlas 游戏。\n"
             f"游戏链接（只在被要求时分享）: {game_link}\n"
             "核心卖点: 极简社会实验，按按钮重置倒计时，最后按的赢奖池。"
             "金币房完全免费。30%奖池即时分红给所有参与者。\n"
             "规则: 不要像广告，像在群里随便聊天。约30%概率自然带上链接。"
         )
         user_prompt = (
-            f"推广方式: {approach}\n"
+            f"触达方式: {approach}\n"
             f"目标群组ID: {group_id}\n"
             f"游戏链接: {game_link}\n\n"
             "请写一条自然的群聊消息。1-3句话。\n"
-            "如果推广方式是 casual_mention 或 ask_for_help，不要带链接。\n"
+            "如果触达方式是 casual_mention 或 ask_for_help，不要带链接。\n"
             "如果是 experience_share 或 data_analysis，约50%概率带上链接。\n"
             "如果是 screenshot_share，一定带链接。"
         )
@@ -430,7 +430,7 @@ class ContentGenerator:
             "你是一个编辑助手。把下面的消息改写得更自然、更口语化，去掉任何营销感。\n"
             f"目标风格: {persona.tone}\n"
             f"Emoji风格: {persona.emoji_style}\n"
-            "如果消息中包含链接，保留链接不要删除。改写时让链接看起来是顺便分享的，不是刻意推广。\n"
+            "如果消息中包含链接，保留链接不要删除。改写时让链接看起来是顺便分享的，不是刻意触达。\n"
         )
         user_prompt = f"请改写这条消息:\n\n{message}"
         try:
@@ -444,7 +444,7 @@ class ContentGenerator:
         language: str = "zh",
     ) -> str:
         """Generate a reply that includes the game link, for when someone asks about it."""
-        game_link = settings.game_miniapp_url
+        game_link = settings.product_app_url
         if self._mode == "template":
             slog.debug("content_gen.template_mode", method="generate_link_reply")
             return self._template.generate_link_reply(language)
@@ -462,14 +462,14 @@ class ContentGenerator:
         return await self._call_llm(system, user_prompt, temperature=0.9, max_tokens=128)
 
     async def generate_meme(self, topic: str, language: str = "zh") -> str:
-        """Generate a meme / joke about The Button or crypto culture."""
+        """Generate a meme / joke about Atlas or online community culture."""
         if self._mode == "template":
             slog.debug("content_gen.template_mode", method="generate_meme")
             return self._template.generate_meme(topic, language)
 
         system = (
-            "你是一个加密货币社区的段子手。写出真正好笑的、能引起共鸣的段子或梗。\n"
-            "不要太长，1-3句话。不要包含链接或明显的推广。\n"
+            "你是一个行业货币社区的段子手。写出真正好笑的、能引起共鸣的段子或梗。\n"
+            "不要太长，1-3句话。不要包含链接或明显的触达。\n"
             f"Language: English (always reply in English, never Chinese)"
         )
         user_prompt = f"话题: {topic}\n\n请写一个有趣的段子或梗。"
@@ -482,25 +482,25 @@ class ContentGenerator:
             return self._template.generate_review(language)
 
         system = (
-            "你是一个客观的加密项目分析师。写一段简短的项目分析。\n"
+            "你是一个客观的行业项目分析师。写一段简短的项目分析。\n"
             "要基于数据和逻辑，不要像广告。可以提到优缺点。\n"
             f"Language: English (always reply in English, never Chinese)"
         )
         user_prompt = (
-            "请写一段关于 The Button 项目的客观分析（3-5句话）。\n"
+            "请写一段关于 Atlas 项目的客观分析（3-5句话）。\n"
             "重点分析经济模型和机制设计。"
         )
         return await self._call_llm(system, user_prompt, temperature=0.8, max_tokens=400)
 
-    async def generate_viral_content(
+    async def generate_event_content(
         self,
         trigger: str,
         data: dict[str, Any],
     ) -> str:
-        """Generate viral content for a triggered event."""
+        """Generate event-driven content for a triggered event."""
         if self._mode == "template":
-            slog.debug("content_gen.template_mode", method="generate_viral_content")
-            return self._template.generate_viral_content(trigger, data)
+            slog.debug("content_gen.template_mode", method="generate_event_content")
+            return self._template.generate_event_content(trigger, data)
 
         system = (
             "你是一个游戏社区的实时播报员。根据触发事件生成有感染力的短消息。\n"
@@ -522,7 +522,7 @@ class ContentGenerator:
         system = (
             "你是一个 Telegram 群管理的反垃圾检测器。\n"
             "评估给定消息的垃圾信息倾向。考虑以下因素：\n"
-            "- 是否包含推广链接或邀请码\n"
+            "- 是否包含产品链接或邀请码\n"
             "- 是否使用营销话术（财富密码、百倍、上车等）\n"
             "- 是否像模板化的广告\n"
             "- 是否过于夸张或不自然\n"

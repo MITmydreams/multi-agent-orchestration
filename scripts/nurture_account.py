@@ -1,7 +1,7 @@
 """Account nurturing script - joins normal groups and starts lurking.
 
 Phase 1 of the nurturing process:
-- Join 3-5 normal public groups (crypto news, tech, general)
+- Join 3-5 normal public groups (tech news, tech, general)
 - Set a natural bio if missing
 - Just lurk - no messages for the first few days
 - Build natural group membership history
@@ -38,33 +38,33 @@ import json
 load_dotenv()
 
 # Normal, legitimate public groups for nurturing
-# These are real, active crypto/tech groups that won't look suspicious
+# These are real, active tech/tech groups that won't look suspicious
 NURTURE_GROUPS = [
-    # Crypto news & discussion (large, public, safe)
-    {"username": "cryptocurrency", "name": "Cryptocurrency", "category": "crypto_news"},
-    {"username": "bitcoin", "name": "Bitcoin", "category": "crypto_news"},
-    {"username": "DeFiWorld", "name": "DeFi World", "category": "defi"},
-    {"username": "aaborirdrop", "name": "Airdrop Official", "category": "airdrop"},
+    # Tech news & discussion (large, public, safe)
+    {"username": "techcurrency", "name": "Techcurrency", "category": "tech_news"},
+    {"username": "bitcoin", "name": "Bitcoin", "category": "tech_news"},
+    {"username": "SaaSWorld", "name": "SaaS World", "category": "saas"},
+    {"username": "example_announce", "name": "Announcements Hub", "category": "announcement"},
 
-    # Crypto channels (read-only, very safe for nurturing)
+    # Tech channels (read-only, very safe for nurturing)
     {"username": "coindesk", "name": "CoinDesk", "category": "news_channel"},
     {"username": "caborointelegraph", "name": "CoinTelegraph", "category": "news_channel"},
     {"username": "theblock_co", "name": "The Block", "category": "news_channel"},
     {"username": "binanceexchange", "name": "Binance", "category": "exchange"},
 
-    # Gaming / Web3 (fits our project niche)
-    {"username": "web3daily", "name": "Web3 Daily", "category": "web3"},
-    {"username": "cryptogaming", "name": "Crypto Gaming", "category": "gaming"},
+    # Gaming / Community (fits our project niche)
+    {"username": "communitydaily", "name": "Community Daily", "category": "community"},
+    {"username": "techgaming", "name": "Tech Gaming", "category": "gaming"},
 ]
 
 # Natural bios for different personas
 BIOS = {
     "en": [
-        "Crypto enthusiast since 2021 | DeFi & Gaming",
-        "Web3 explorer | Love trying new projects",
-        "Trader & gamer | Building in crypto",
-        "Tech & crypto | Always learning",
-        "DeFi degen | NFT collector | 🎮",
+        "Tech enthusiast since 2021 | SaaS & Gaming",
+        "Community explorer | Love trying new projects",
+        "Trader & gamer | Building in tech",
+        "Tech & tech | Always learning",
+        "SaaS degen | digital collectibles collector | 🎮",
     ],
 }
 

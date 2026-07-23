@@ -1,7 +1,7 @@
 """Send a message to a Telegram group with a specified account.
 
 Usage:
-    .venv/bin/python scripts/send_message.py --account 1 --group thebuttongroup --message "Hey!"
+    .venv/bin/python scripts/send_message.py --account 1 --group example_group --message "Hey!"
 """
 import os
 import argparse
@@ -20,7 +20,7 @@ from telethon import TelegramClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-DB_URL = "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot"
+DB_URL = "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator"
 PROXIES_FILE = Path("config/proxies.json")
 
 

@@ -20,25 +20,25 @@ from telethon.tl.functions.account import UpdateProfileRequest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-DB_URL = "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot"
+DB_URL = "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator"
 PROXIES_FILE = Path("config/proxies.json")
 
 # Distinct English bios per persona
 PERSONA_BIOS = {
-    "crypto_veteran": [
-        "Since 2017 | DeFi & GameFi | dyor",
-        "Crypto OG | Survived every cycle | 🤔",
-        "Long-term thinker | DeFi native | nfa",
+    "tech_veteran": [
+        "Since 2017 | SaaS & product | do your own research",
+        "Tech OG | Survived every cycle | 🤔",
+        "Long-term thinker | SaaS native | nfa",
         "Been here since NEO days | mechanism nerd",
     ],
     "game_newbie": [
-        "Gamer exploring Web3 | lots of ??? 🎮",
-        "Mobile gaming addict | trying crypto games",
-        "Genshin > everything | learning Web3 lol",
+        "Gamer exploring Community | lots of ??? 🎮",
+        "Mobile gaming addict | trying tech games",
+        "Genshin > everything | learning Community lol",
         "Just here for fun 🎮✨",
     ],
-    "airdrop_hunter": [
-        "Full-time airdrop farmer | alpha hunter",
+    "community_scout": [
+        "Full-time announcement farmer | alpha hunter",
         "Farming since 2023 | multi-wallet | 📌",
         "New project radar ON 🔥 | zero-cost ops",
         "Alpha hunter | LP degen | gas optimizer",
@@ -51,7 +51,7 @@ PERSONA_BIOS = {
     ],
     "community_active": [
         "Lurking in 50+ groups 😂 | always down to chat",
-        "Crypto Twitter refugee | vibes only ✨",
+        "Tech Twitter refugee | vibes only ✨",
         "Group chat main character 🔥 | be nice",
         "Friendly neighborhood degen | ❤️",
     ],

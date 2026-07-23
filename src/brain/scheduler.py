@@ -6,8 +6,8 @@ The ``CentralBrain`` is the top-level coordinator.  It runs a scheduling loop
 1. Collects intelligence from the Scout agent.
 2. Evaluates risk across all active accounts.
 3. Checks global circuit-breaker state.
-4. Reacts to game events via the Viral Engine.
-5. Assigns routine infiltration / content tasks.
+4. Reacts to game events via the Event Agent.
+5. Assigns routine engagement / content tasks.
 6. Collects metrics via Analytics.
 
 A separate daily-maintenance cycle handles counter resets, report generation,
@@ -30,9 +30,9 @@ from src.brain.risk_engine import RiskEngine, RiskLevel
 from src.brain.circuit_breaker import CircuitBreaker, SystemState
 from src.brain.analytics import Analytics
 from src.agents.scout.agent import ScoutAgent
-from src.agents.infiltrator.agent import InfiltratorAgent
+from src.agents.executor.agent import ExecutorAgent
 from src.agents.content.agent import ContentSeederAgent
-from src.agents.viral.agent import ViralEngineAgent
+from src.agents.events.agent import EventAgent
 from src.tg_clients.user_client import UserClientManager
 from src.models.base import get_session
 from src.models.account import Account
@@ -46,7 +46,7 @@ logger = structlog.get_logger(__name__)
 class CentralBrain:
     """AI Central Scheduling Brain.
 
-    Coordinates the Scout, Infiltrator, Content-Seeder, and Viral-Engine
+    Coordinates the Scout, Executor, Content-Seeder, and Viral-Engine
     agents through a periodic main loop, gated by the RiskEngine and
     CircuitBreaker.
     """
@@ -57,18 +57,18 @@ class CentralBrain:
         circuit_breaker: CircuitBreaker,
         analytics: Analytics,
         scout: ScoutAgent,
-        infiltrator: InfiltratorAgent,
+        executor: ExecutorAgent,
         content_seeder: ContentSeederAgent,
-        viral_engine: ViralEngineAgent,
+        event_agent: EventAgent,
         user_client: UserClientManager,
     ) -> None:
         self._risk_engine = risk_engine
         self._circuit_breaker = circuit_breaker
         self._analytics = analytics
         self._scout = scout
-        self._infiltrator = infiltrator
+        self._executor = executor
         self._content_seeder = content_seeder
-        self._viral_engine = viral_engine
+        self._event_agent = event_agent
         self._user_client = user_client
 
         self._running = False
@@ -131,8 +131,8 @@ class CentralBrain:
         1. Collect intelligence (Scout).
         2. Risk-assess all active accounts (RiskEngine).
         3. Check global circuit-breaker state.
-        4. React to game events (ViralEngine).
-        5. Assign routine tasks (Infiltrator + Content).
+        4. React to external signals (EventAgent).
+        5. Assign routine tasks (Executor + Content).
         6. Collect cycle metrics (Analytics).
         """
         self._cycle_count += 1
@@ -168,7 +168,7 @@ class CentralBrain:
 
         # 4. Game event handling
         try:
-            events = await self._viral_engine.check_game_events()
+            events = await self._event_agent.check_game_events()
             if events:
                 await self.handle_game_events(events)
         except Exception:
@@ -177,9 +177,9 @@ class CentralBrain:
         # 5. Routine task assignment (throttled by speed multiplier)
         if speed > 0:
             try:
-                await self.assign_infiltration_tasks()
+                await self.assign_engagement_tasks()
             except Exception:
-                logger.exception("scheduler.infiltration.error")
+                logger.exception("scheduler.engagement.error")
 
             try:
                 content_count = await self._content_seeder.run_content_cycle()
@@ -218,7 +218,7 @@ class CentralBrain:
             account_data = {
                 "id": acct.id,
                 "messages_sent_today": acct.messages_sent_today,
-                "promo_messages_today": acct.promo_messages_today,
+                "outreach_messages_today": acct.outreach_messages_today,
                 "groups_active_today": acct.groups_active_today,
                 "new_groups_today": acct.new_groups_today,
                 "dms_initiated_today": acct.dms_initiated_today,
@@ -265,7 +265,7 @@ class CentralBrain:
     # Task assignment
     # ------------------------------------------------------------------
 
-    async def assign_infiltration_tasks(self) -> None:
+    async def assign_engagement_tasks(self) -> None:
         """Match available accounts to target groups and dispatch tasks.
 
         Two-phase approach:
@@ -373,7 +373,7 @@ class CentralBrain:
             acct_result = await session.execute(
                 select(Account).where(
                     Account.status == "active",
-                    Account.role.in_(["infiltrator", "content"]),
+                    Account.role.in_(["executor", "content"]),
                     Account.messages_sent_today < settings.max_messages_per_day,
                 )
             )
@@ -511,7 +511,7 @@ class CentralBrain:
         for i in range(0, len(send_tasks), BATCH_SIZE):
             batch = send_tasks[i:i + BATCH_SIZE]
             await asyncio.gather(
-                *(self._infiltrator.execute_task(t) for t in batch),
+                *(self._executor.execute_task(t) for t in batch),
                 return_exceptions=True,
             )
             assignments_made += len(batch)
@@ -619,7 +619,7 @@ class CentralBrain:
         for i in range(0, len(join_tasks), BATCH_SIZE):
             batch = join_tasks[i:i + JOIN_BATCH_SIZE]
             await asyncio.gather(
-                *(self._infiltrator.execute_task(t) for t in batch),
+                *(self._executor.execute_task(t) for t in batch),
                 return_exceptions=True,
             )
             assignments_made += len(batch)
@@ -728,13 +728,13 @@ class CentralBrain:
     # ------------------------------------------------------------------
 
     async def handle_game_events(self, events: list[dict]) -> None:
-        """Delegate game events to the ViralEngine for time-sensitive reactions."""
+        """Delegate signals to the EventAgent for time-sensitive reactions."""
         logger.info("scheduler.game_events", count=len(events))
-        results = await self._viral_engine.handle_events(events)
+        results = await self._event_agent.handle_events(events)
         for r in results:
             if r.get("actions_taken"):
                 logger.info(
-                    "scheduler.viral_action",
+                    "scheduler.event_action",
                     event_type=r.get("event_type"),
                     actions=r["actions_taken"],
                 )

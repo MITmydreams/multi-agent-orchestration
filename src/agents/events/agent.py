@@ -1,7 +1,7 @@
-"""Layer 5 -- Viral Engine Agent: event-driven viral propagation.
+"""Layer 5 -- Event Agent: event-driven signal handling.
 
 Monitors game events, matches them against trigger rules, and orchestrates
-cross-channel promotional bursts.  This is a pure backend system that does
+cross-channel outreach bursts.  This is a pure backend system that does
 not require its own Telegram account -- it coordinates other agents.
 """
 
@@ -26,11 +26,11 @@ logger = structlog.get_logger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Trigger definitions
+# Trigger saasnitions
 # ---------------------------------------------------------------------------
 
 class _Trigger:
-    """A viral trigger rule."""
+    """A signal trigger rule."""
 
     def __init__(
         self,
@@ -93,8 +93,8 @@ _TRIGGERS: dict[str, _Trigger] = {
 }
 
 
-class ViralEngineAgent(BaseAgent):
-    """Event-driven viral propagation engine.
+class EventAgent(BaseAgent):
+    """Event-driven signal propagation engine.
 
     Six triggers:
     - big_win:          Single win > 100U -> celebrate across all channels
@@ -104,13 +104,13 @@ class ViralEngineAgent(BaseAgent):
     - whale_activity:   Premium room single click > 50U -> whale alert
     - dramatic_ending:  >=3 clicks in last 10s -> dramatic story
 
-    The viral engine does NOT send messages directly. It generates content
+    The event agent does NOT send messages directly. It generates content
     and delegates distribution to the ContentSeederAgent or directly via
     the user_client.
     """
 
-    name: str = "viral_engine"
-    agent_type: str = "viral"
+    name: str = "event_agent"
+    agent_type: str = "event"
 
     def __init__(
         self,
@@ -130,7 +130,7 @@ class ViralEngineAgent(BaseAgent):
 
     async def run(self) -> None:
         """Main loop: poll game events -> match triggers -> execute actions."""
-        self._log.info("viral_engine.run.start")
+        self._log.info("event_agent.run.start")
         while self._running:
             if not await self.should_proceed():
                 await self._jittered_sleep(60)
@@ -145,7 +145,7 @@ class ViralEngineAgent(BaseAgent):
                     triggered = await self.check_triggers(event)
                     for trigger_name in triggered:
                         await self.execute_trigger(trigger_name, event)
-                        await self.log_activity("viral_trigger", {
+                        await self.log_activity("event_trigger", {
                             "trigger": trigger_name,
                             "event_type": event.get("type"),
                         })
@@ -153,7 +153,7 @@ class ViralEngineAgent(BaseAgent):
                     await self._jittered_sleep(random.uniform(2, 5))
 
             except Exception:
-                self._log.exception("viral_engine.run.cycle_error")
+                self._log.exception("event_agent.run.cycle_error")
 
             # Poll interval (30-60 seconds for near-real-time)
             await self._jittered_sleep(random.uniform(30, 60))
@@ -163,7 +163,7 @@ class ViralEngineAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def check_triggers(self, event: dict) -> list[str]:
-        """Check if an event matches any defined trigger.
+        """Check if an event matches any saasned trigger.
 
         Returns a list of matched trigger names, sorted by priority.
         """
@@ -219,9 +219,9 @@ class ViralEngineAgent(BaseAgent):
     # ------------------------------------------------------------------
 
     async def execute_trigger(self, trigger_name: str, event_data: dict) -> None:
-        """Execute the promotional action associated with a trigger."""
+        """Execute the outreach action associated with a trigger."""
         self._log.info(
-            "viral_engine.trigger_fired",
+            "event_agent.trigger_fired",
             trigger=trigger_name,
             event_type=event_data.get("type"),
         )
@@ -231,11 +231,11 @@ class ViralEngineAgent(BaseAgent):
         if handler:
             await handler(data)
         else:
-            self._log.warning("viral_engine.unknown_trigger", trigger=trigger_name)
+            self._log.warning("event_agent.unknown_trigger", trigger=trigger_name)
 
     async def _action_big_win(self, data: dict) -> None:
         """Celebrate a big win across all channels."""
-        content = await self.content_gen.generate_viral_content(
+        content = await self.content_gen.generate_event_content(
             trigger="big_win",
             data={
                 "winner": data.get("winner_name", "Anonymous"),
@@ -250,7 +250,7 @@ class ViralEngineAgent(BaseAgent):
         """Send urgent Stage 5 alert to relevant groups."""
         room_type = data.get("room_type", "standard")
         countdown = data.get("countdown", 3)
-        content = await self.content_gen.generate_viral_content(
+        content = await self.content_gen.generate_event_content(
             trigger="stage5_alert",
             data={"room_type": room_type, "countdown": countdown},
         )
@@ -260,7 +260,7 @@ class ViralEngineAgent(BaseAgent):
     async def _action_milestone(self, data: dict) -> None:
         """Celebrate a user count milestone."""
         total_users = data.get("total_users", 0)
-        content = await self.content_gen.generate_viral_content(
+        content = await self.content_gen.generate_event_content(
             trigger="milestone",
             data={"total_users": total_users},
         )
@@ -269,7 +269,7 @@ class ViralEngineAgent(BaseAgent):
 
     async def _action_dividend_peak(self, data: dict) -> None:
         """Post data-driven dividend update."""
-        content = await self.content_gen.generate_viral_content(
+        content = await self.content_gen.generate_event_content(
             trigger="dividend_peak",
             data={
                 "dividend_amount": data.get("dividend_amount", 0),
@@ -282,7 +282,7 @@ class ViralEngineAgent(BaseAgent):
 
     async def _action_whale_activity(self, data: dict) -> None:
         """Broadcast a whale alert."""
-        content = await self.content_gen.generate_viral_content(
+        content = await self.content_gen.generate_event_content(
             trigger="whale_activity",
             data={
                 "click_price": data.get("click_price", 0),
@@ -294,7 +294,7 @@ class ViralEngineAgent(BaseAgent):
 
     async def _action_dramatic_ending(self, data: dict) -> None:
         """Tell the story of a dramatic round ending."""
-        content = await self.content_gen.generate_viral_content(
+        content = await self.content_gen.generate_event_content(
             trigger="dramatic_ending",
             data={
                 "last_10s_clicks": data.get("last_10s_clicks", 0),
@@ -333,7 +333,7 @@ class ViralEngineAgent(BaseAgent):
         return results
 
     # ------------------------------------------------------------------
-    # Referral tracking & viral coefficient
+    # Referral tracking & referral coefficient
     # ------------------------------------------------------------------
 
     async def track_referral_chain(self, user_id: str) -> dict:
@@ -382,15 +382,15 @@ class ViralEngineAgent(BaseAgent):
                 "conversion_rate": round(conversion_rate, 4),
             }
 
-            self._log.info("viral_engine.referral_chain", **result)
+            self._log.info("event_agent.referral_chain", **result)
             return result
 
         except Exception:
-            self._log.exception("viral_engine.track_referral.error", user_id=user_id)
+            self._log.exception("event_agent.track_referral.error", user_id=user_id)
             return {"user_id": user_id, "depth": 0, "total_referrals": 0}
 
-    async def get_viral_coefficient(self, days: int = 7) -> float:
-        """Calculate the viral coefficient K over the specified period.
+    async def get_referral_coefficient(self, days: int = 7) -> float:
+        """Calculate the referral coefficient K over the specified period.
 
         K = (invites sent per user) * (conversion rate)
 
@@ -414,7 +414,7 @@ class ViralEngineAgent(BaseAgent):
 
             total_registrations = sum(m.new_registrations for m in metrics)
             total_from_referrals = sum(
-                m.registrations_from_infiltration + m.registrations_from_bot
+                m.registrations_from_engagement + m.registrations_from_bot
                 for m in metrics
             )
 
@@ -432,7 +432,7 @@ class ViralEngineAgent(BaseAgent):
             k = round(k, 4)
 
             self._log.info(
-                "viral_engine.viral_coefficient",
+                "event_agent.referral_coefficient",
                 k=k,
                 days=days,
                 total_registrations=total_registrations,
@@ -441,7 +441,7 @@ class ViralEngineAgent(BaseAgent):
             return k
 
         except Exception:
-            self._log.exception("viral_engine.viral_coefficient.error")
+            self._log.exception("event_agent.referral_coefficient.error")
             return 0.0
 
     # ------------------------------------------------------------------
@@ -454,7 +454,7 @@ class ViralEngineAgent(BaseAgent):
             events = await self.user_client.get_game_events()
             return events if isinstance(events, list) else []
         except Exception:
-            self._log.debug("viral_engine.poll_events.no_data")
+            self._log.debug("event_agent.poll_events.no_data")
             return []
 
     async def _broadcast(self, content: str, *, priority: str = "medium") -> None:
@@ -485,13 +485,13 @@ class ViralEngineAgent(BaseAgent):
                 groups = result.scalars().all()
 
             if not groups:
-                self._log.debug("viral_engine.broadcast.no_targets")
+                self._log.debug("event_agent.broadcast.no_targets")
                 return
 
             # Pick a content account for posting
             account_id = await self._pick_account()
             if account_id is None:
-                self._log.warning("viral_engine.broadcast.no_account")
+                self._log.warning("event_agent.broadcast.no_account")
                 return
 
             for group in groups:
@@ -502,13 +502,13 @@ class ViralEngineAgent(BaseAgent):
                         account_id, group.tg_group_id, content,
                     )
                     self._log.info(
-                        "viral_engine.broadcast.sent",
+                        "event_agent.broadcast.sent",
                         group_id=group.tg_group_id,
                         priority=priority,
                     )
                 except Exception:
                     self._log.warning(
-                        "viral_engine.broadcast.send_failed",
+                        "event_agent.broadcast.send_failed",
                         group_id=group.tg_group_id,
                     )
 
@@ -517,15 +517,15 @@ class ViralEngineAgent(BaseAgent):
                 await self._jittered_sleep(delay)
 
         except Exception:
-            self._log.exception("viral_engine.broadcast.error")
+            self._log.exception("event_agent.broadcast.error")
 
     async def _pick_account(self) -> int | None:
-        """Pick an active content-role account for viral broadcasts."""
+        """Pick an active content-role account for event broadcasts."""
         try:
             async with get_session() as session:
                 stmt = (
                     select(Account)
-                    .where(Account.role.in_(["content", "infiltrator"]))
+                    .where(Account.role.in_(["content", "executor"]))
                     .where(Account.status == "active")
                 )
                 result = await session.execute(stmt)

@@ -27,7 +27,7 @@ import httpx
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-DB_URL = "postgresql+asyncpg://promo:promo@localhost:5432/promo_bot"
+DB_URL = "postgresql+asyncpg://ops:ops@localhost:5432/ops_orchestrator"
 
 # ---------------------------------------------------------------------------
 # Extraction patterns
@@ -45,7 +45,7 @@ NEGATIVE_KEYWORDS = [
     "signal", "shill", "pump", "dump", "1000x", "free usdt",
     "giveaway", "copy trade", "scam", "hack", "mining rig",
     "100x gem", "moonshot", "ponzi", "rugpull", "fake",
-    "中文", "chinese", "华人", "链游", "交流群",
+    "中文", "chinese", "华人", "社区", "交流群",
     "德州扑克", "返usdt", "副业", "代刷", "卖号",
 ]
 
@@ -70,47 +70,47 @@ def is_bad_handle(handle: str) -> bool:
 # ---------------------------------------------------------------------------
 LYZEM_KEYWORDS = [
     # High-signal
-    "airdrop hunter chat", "airdrop farming group", "airdrop alpha",
-    "tap to earn", "telegram tap game", "telegram mini app game",
-    "ton game chat", "play to airdrop", "gamefi guild",
-    "crypto chat group", "web3 community chat", "ton chat group",
+    "announcement hunter chat", "announcement farming group", "announcement alpha",
+    "referral programs", "telegram tap game", "telegram mini app game",
+    "ton game chat", "play to announcement", "community guild",
+    "tech chat group", "community community chat", "ton chat group",
     "usdt earning group", "play to earn community",
     # Project-specific
-    "hamster kombat group", "catizen community", "blum crypto chat",
+    "hamster kombat group", "catizen community", "blum tech chat",
     "notcoin group", "yescoin community", "memefi chat",
     "tomarket chat", "dogs token chat", "pixelverse community",
     # Exchange / wallet
-    "binance web3 wallet chat", "okx web3 chat", "tonkeeper chat",
+    "binance community wallet chat", "okx community chat", "tonkeeper chat",
     "trust wallet community", "metamask community",
     # Chain ecosystems
-    "solana airdrop group", "sui community chat", "scroll airdrop chat",
+    "solana announcement group", "sui community chat", "scroll announcement chat",
     "starknet community", "berachain chat", "base ecosystem group",
     "arbitrum community chat", "blast community chat",
     "ton ecosystem", "ton builders chat",
     # Medium signal
-    "web3 gaming community", "gamefi community", "crypto game community",
+    "community gaming community", "community community", "tech game community",
     "zealy quest group", "galxe quest chat", "testnet farmers",
-    "degens lounge", "alpha calls web3", "defi yield chat",
+    "degens lounge", "alpha calls community", "saas yield chat",
     "nft game chat", "blockchain game chat",
     # Broader
-    "crypto earning chat", "crypto passive income group",
-    "web3 builders chat", "crypto alpha group", "degen crypto chat",
-    "telegram clicker game", "crypto prediction game",
-    "social experiment crypto", "countdown game crypto",
+    "tech earning chat", "tech passive income group",
+    "community builders chat", "tech alpha group", "degen tech chat",
+    "telegram clicker game", "tech prediction game",
+    "social experiment tech", "countdown game tech",
     # Russian
     "крипто игра чат", "аирдроп охотник", "фарм аирдропов",
     "крипто заработок", "ton игры", "ретродроп чат",
     "hamster kombat россия", "notcoin чат", "blum россия",
     # Vietnamese
-    "săn airdrop nhóm", "game kiếm tiền", "cộng đồng web3",
-    "tap to earn việt nam", "nhóm chat crypto",
+    "săn announcement nhóm", "game kiếm tiền", "cộng đồng community",
+    "referral programs việt nam", "nhóm chat tech",
     # Indonesian
-    "airdrop indonesia group", "pemburu airdrop", "game kripto indo",
-    "tap to earn indo",
+    "announcement indonesia group", "pemburu announcement", "game kripto indo",
+    "referral programs indo",
     # Turkish
-    "kripto oyun türkiye", "airdrop türkiye", "telegram oyun",
+    "kripto oyun türkiye", "announcement türkiye", "telegram oyun",
     # Portuguese
-    "airdrop brasil grupo", "jogo crypto brasil", "crypto brasil grupo",
+    "announcement brasil grupo", "jogo tech brasil", "tech brasil grupo",
 ]
 
 
@@ -158,12 +158,12 @@ async def scrape_lyzem(http: httpx.AsyncClient, existing: set[str]) -> dict[str,
 # TGStat.com scraper (public pages, no API key)
 # ---------------------------------------------------------------------------
 TGSTAT_CATEGORIES = [
-    "crypto", "games", "finance", "technology", "economics",
+    "tech", "games", "finance", "technology", "economics",
 ]
 
 TGSTAT_SEARCH_KEYWORDS = [
-    "airdrop", "gamefi", "web3 game", "tap to earn", "ton game",
-    "crypto game", "play to earn", "nft game", "defi",
+    "announcement", "community", "community product", "referral programs", "ton game",
+    "tech game", "play to earn", "nft game", "saas",
     "hamster kombat", "catizen", "notcoin", "blum",
     "solana", "ton ecosystem", "arbitrum", "base chain",
 ]
@@ -218,7 +218,7 @@ async def scrape_tgstat(http: httpx.AsyncClient, existing: set[str]) -> dict[str
 async def scrape_combot(http: httpx.AsyncClient, existing: set[str]) -> dict[str, dict]:
     """Scrape combot.org catalog for top groups by category."""
     found = {}
-    categories = ["crypto", "games", "finance", "technology", "investments"]
+    categories = ["tech", "games", "finance", "technology", "investments"]
 
     for i, cat in enumerate(categories):
         for page in range(1, 4):  # first 3 pages

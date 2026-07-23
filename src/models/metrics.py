@@ -25,12 +25,12 @@ class DailyMetrics(Base):
 
     # Message stats
     messages_sent: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    promo_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    promo_ratio: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    outreach_messages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    outreach_ratio: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
 
     # Registration stats
     new_registrations: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    registrations_from_infiltration: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    registrations_from_engagement: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     registrations_from_bot: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     registrations_from_channel: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 

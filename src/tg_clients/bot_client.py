@@ -1,4 +1,4 @@
-"""Official Telegram Bot client for The Button game.
+"""Official Telegram Bot client for Atlas game.
 
 Uses python-telegram-bot v21+ async Application builder pattern.
 """
@@ -31,7 +31,7 @@ logger = structlog.get_logger(__name__)
 
 # ---- Constants --------------------------------------------------------
 
-MINI_APP_URL = settings.game_api_url.replace("api.", "app.")  # e.g. https://app.thebutton.game
+MINI_APP_URL = settings.product_api_url.replace("api.", "app.")  # e.g. https://app.atlas.game
 ROOMS = {
     "coin": {"emoji": "\U0001fa99", "name": "Coin Room", "color": "#00c853"},
     "fast": {"emoji": "\u26a1", "name": "Fast Room", "color": "#ff6b00"},
@@ -41,7 +41,7 @@ ROOMS = {
 
 
 class OfficialBot:
-    """The Button official Telegram Bot.
+    """Atlas official Telegram Bot.
 
     Provides command handlers, inline queries, and notification push helpers
     that connect players to the Mini App front-end.
@@ -51,8 +51,8 @@ class OfficialBot:
         self._token = token or settings.tg_bot_token
         self._app: Application | None = None
         self._http = httpx.AsyncClient(
-            base_url=settings.game_api_url,
-            headers={"Authorization": f"Bearer {settings.game_api_key}"},
+            base_url=settings.product_api_url,
+            headers={"Authorization": f"Bearer {settings.product_api_key}"},
             timeout=10,
         )
 
@@ -102,7 +102,7 @@ class OfficialBot:
 
         keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton(
-                "\U0001f534 Open The Button",
+                "\U0001f534 Open Atlas",
                 web_app=WebAppInfo(url=MINI_APP_URL),
             )],
             [
@@ -124,9 +124,9 @@ class OfficialBot:
                 logger.exception("bot.referral_track_error", code=referral_code)
 
         await update.effective_message.reply_text(
-            "\U0001f534 *Welcome to The Button!*\n\n"
-            "Press the button. Reset the timer. Win the prize.\n"
-            "Zero learning curve \u2014 everyone understands *press the button*.\n\n"
+            "\U0001f534 *Welcome to Atlas!*\n\n"
+            "Press Atlas. Reset the timer. Win the prize.\n"
+            "Zero learning curve \u2014 everyone understands *press Atlas*.\n\n"
             "\u26a1 Choose a room and start playing!",
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=keyboard,
@@ -190,7 +190,7 @@ class OfficialBot:
         link = f"https://t.me/{bot_username}?start=ref_{user_id}"
 
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("\U0001f4e4 Share", switch_inline_query=f"Join The Button! {link}")],
+            [InlineKeyboardButton("\U0001f4e4 Share", switch_inline_query=f"Join Atlas! {link}")],
         ])
 
         await update.effective_message.reply_text(
@@ -258,7 +258,7 @@ class OfficialBot:
             return
 
         await update.effective_message.reply_text(
-            "\U0001f4ac *The Button \u2014 Commands*\n\n"
+            "\U0001f4ac *Atlas \u2014 Commands*\n\n"
             "/start \u2014 Open the game\n"
             "/balance \u2014 Check your balance\n"
             "/history \u2014 Recent games\n"
@@ -355,7 +355,7 @@ class OfficialBot:
                 text=(
                     f"{urgency}\n\n"
                     f"{info['emoji']} *{info['name']}* has entered Stage {stage}!\n"
-                    "The timer is running out \u2014 press the button now or miss your chance!"
+                    "The timer is running out \u2014 press Atlas now or miss your chance!"
                 ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=keyboard,
